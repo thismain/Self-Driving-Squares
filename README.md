@@ -3,7 +3,7 @@
 November 15, 2020
 Live demo: http://drive.x10host.com/city/paths.htm  
   
-Load an image with roughly the proportions and resolution of your screen, in which image there are streets which are pure white, and in which image nothing else is white. Tiny squares, which I refer to as cars, will find their way along the streets. You can also pan and zoom the world using your left mouse button and wheel.  
+Tiny squares, which I refer to as cars, find their way along the streets in an image. You can also pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling the colors in the image.
   
 I am using the Matter.js  2d physics library for animation and rendering of the squares:  
 https://brm.io/matter-js/  
