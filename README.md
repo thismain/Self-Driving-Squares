@@ -3,7 +3,7 @@
 November 15, 2020
 Live demo: http://drive.x10host.com/city/paths.htm  
   
-Load an image with roughly the proportions and resolution of your screen, in which image there are streets which are pure white, and in which image nothing else is white. Tiny squares, which I refer to as cars, will find their way along the streets. My tiny computer cannot animate more than around 200 squares, but yours can maybe manage more. You can also pan and zoom the world using your left mouse button and wheel.  
+Load an image with roughly the proportions and resolution of your screen, in which image there are streets which are pure white, and in which image nothing else is white. Tiny squares, which I refer to as cars, will find their way along the streets. You can also pan and zoom the world using your left mouse button and wheel.  
   
 I am using the Matter.js  2d physics library for animation and rendering of the squares:  
 https://brm.io/matter-js/  
