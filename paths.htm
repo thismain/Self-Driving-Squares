@@ -1,0 +1,797 @@
+<html>
+<head>
+<!--
+November 15, 2020
+Live demo: http://drive.x10host.com/city/paths.htm
+
+Load an image with roughly the proportions and resolution of your screen, in which image there are streets which are pure white, and in which image nothing else is white. Tiny squares, which I refer to as cars, will find their way along the streets. My tiny computer cannot animate more than around 200 squares, but yours can maybe manage more. You can also pan and zoom the world using your left mouse button and wheel.
+
+I am using the Matter.js  2d physics library for animation and rendering of the squares:
+https://brm.io/matter-js/
+https://github.com/liabru/matter-js
+
+I am also using images from:
+https://www.dreamstime.com/stock-images-city-seamless-vector-wallpaper-image5056574
+https://thumbs.dreamstime.com/b/city-seamless-vector-wallpaper-5056574.jpg
+and
+https://depositphotos.com/68246427/stock-illustration-minimal-city-map-for-gps.html
+https://st2.depositphotos.com/4559651/6824/v/950/depositphotos_68246427-stock-illustration-minimal-city-map-for-gps.jpg
+
+Both of the above images I used required processing, to change the width/height ratio, and to remove the non-white pixels from the streets, for which I used Gimp.
+-->
+<script src="matter.js"></script>
+<script src="matter-wrap.js"></script>
+</head>
+<body id="bodid" style="overflow:hidden;">
+
+<canvas id="canvid" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:1000;" ></canvas>
+<canvas id="canvasBG" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:900;"></canvas>
+<canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;"></canvas>
+<div id="borderDiv" style="z-index:100000;position:absolute;width:1px;height:1px;left:-10px;top:-10px;" ></div>
+
+<div id="tester" style="z-index:10000;position:absolute;top:100px;left:100px;color:black;background-color:white;font-family:monospace;font-size:20px;" ></div>
+
+</body>
+</html>
+
+<script>
+
+Matter.use('matter-wrap');
+
+function el(a){return document.getElementById(a);}
+function da(a,b){if(el(a)){el(a).innerHTML=b;el(a).style.display='block';}}
+function fixAngleRad(a){if(a>Math.PI){a-=Math.PI*2;}else if(a<-Math.PI){a+=Math.PI*2;}return a;}
+function randRange(min, max){return Math.floor(Math.random() * (max - min + 1)) + min;}
+function randHexColor(){return '#'+Math.floor(Math.random()*16777215).toString(16);}
+function subber(a,b){return {x:a.x-=b.x, y: a.y-=b.y};}
+
+var imageFiles=['seamlessMapF.png','seamlessMap3.png'];
+var ii=0;
+var zoomer=false;
+var paused=false;
+var numCars=200;
+
+var ww=window.innerWidth;
+var oldww=ww;
+var w_zoomRatio=ww/oldww;
+
+var hh=window.innerHeight;
+var oldhh=hh;
+var h_zoomRatio=hh/oldhh;
+
+el('canvid').width=ww;
+el('canvid').style.width=ww+'px';
+
+el('canvid').height=hh;
+el('canvid').style.height=hh+'px';
+
+el('canvid').style.left='0px';
+el('canvid').style.top='0px';
+
+var fullscreenMode=false;
+
+
+// module aliases, just so you don't need to type 'Matter.' before 'Body', for example, if you do not feel like it
+var 
+Bodies = Matter.Bodies,
+MouseConstraint = Matter.MouseConstraint,
+Mouse = Matter.Mouse,
+Body = Matter.Body,
+Constraint = Matter.Constraint,
+Composite = Matter.Composite,
+Composites = Matter.Composites,
+Common = Matter.Common,
+Common = Matter.Common,
+Bounds = Matter.Bounds,
+Events = Matter.Events;
+
+
+// create an engine
+var engine = Matter.Engine.create(); 
+
+// create a renderer
+var render = Matter.Render.create(
+{
+element: document.body,
+canvas: el('canvid'),
+engine: engine,
+options: {
+width: ww,
+height: hh,
+pixelRatio: 1,
+background: false, //must be false if using image
+wireframeBackground: false,
+//hasBounds must be false to wrap in fullscreen and at all zoom levels, 
+//but might need for zoom/panning
+hasBounds: true, 
+enabled: true,
+wireframes: false,
+showSleeping: false,
+showDebug: false,
+showBroadphase: false,
+showBounds: false,
+showVelocity: false,
+showCollisions: false,
+showSeparations: false,
+showAxes: false,
+showPositions: false,
+showAngleIndicator: false,
+showIds: false,
+showShadows: false,
+showVertexNumbers: false,
+showConvexHulls: false,
+showInternalEdges: false,
+showMousePosition: false
+}
+}
+);
+
+render.bounds.min.x=0;
+render.bounds.min.y=0;
+render.bounds.max.x=ww;
+render.bounds.max.y=hh;
+
+var mouse = Mouse.create(render.canvas),
+mouseConstraint = MouseConstraint.create(engine, {
+mouse: mouse,
+constraint: 
+{
+stiffness: 0.2,
+//length: 0,
+//angularStiffness: 0,
+render: {visible: false}
+}
+});
+
+Matter.World.add(engine.world, mouseConstraint);
+
+// keep the mouse in sync with rendering
+render.mouse = mouse;
+
+
+//just compare old window.innerWidth to current, in timer (.5s), so detect page zoom also
+
+
+//create a 2nd canvas just to hold the background image, so can get pixel colors from background image without needing to re render the image every frame of animation
+var bImg=new Image();
+
+
+function bImgResizer(){
+bImg.src=imageFiles[ii]; 
+bImg.onload=function(){
+el('canvasBG').display='none';
+el('canvasBG').width=ww;
+el('canvasBG').style.width=ww+'px';
+el('canvasBG').height=hh;
+el('canvasBG').style.height=hh+'px'
+el('canvasBG').style.left='0px';
+el('canvasBG').style.top='0px';
+el('canvasBG').getContext('2d').drawImage(bImg,0,0,ww,hh);
+}
+}//end bImgResizer
+
+bImgResizer();
+
+var zImg=new Image();
+zImg.src=imageFiles[ii]; 
+zImg.onload=function(){
+el('canvasZoom').width=ww;
+el('canvasZoom').style.width=ww+'px';
+el('canvasZoom').height=hh;
+el('canvasZoom').style.height=hh+'px'
+el('canvasZoom').style.left='0px';
+el('canvasZoom').style.top='0px';
+el('canvasZoom').style.backgroundColor='#ffffff';
+el('canvasZoom').getContext('2d').drawImage(bImg,0,0,ww,hh);
+}
+
+var borderW=8;
+el('borderDiv').style.width=ww+'px';
+el('borderDiv').style.height=hh+'px';
+el('borderDiv').style.left=-borderW+'px';
+el('borderDiv').style.top=-borderW+'px';
+el('borderDiv').style.border=borderW+'px solid #ffffff'; //748090
+el('borderDiv').style.boxShadow='inset 0px 0px 1px 1px #586474';
+
+
+var carReady=false;
+var car=[];
+var ci=2;
+var startPos=[];
+var gravityDefault=0;
+var frictionAirDefault=.22;
+//var carColor=['#000000','#ff0033','#0091ff','#a600ff'];
+
+var goForward=[];
+var goBackward=[];
+var reverseDir=[];
+var carVel=[];
+var thruster=[];
+var maxAccel=[];
+
+var steerLeft=[];
+var steerRight=[];
+var steerAng=[]; 
+var leftSteerAng=[];
+var rightSteerAng=[];
+var steerAngMax=[];
+
+var thrustInc=.000003;
+var steerAngInc=.01;//.0013;
+var chasers=false;
+var turbo=[];
+var turboToggle=[];
+
+for(var i=0;i<numCars;i++){
+startPos[i]={x:randRange(5,ww-5),y:randRange(5,hh-5)};
+
+goForward[i]=true;
+goBackward[i]=false;
+reverseDir[i]=1;
+thruster[i]=0;
+maxAccel[i]=.0006;
+carVel[i]=maxAccel[i];
+
+steerLeft[i]=false;
+steerRight[i]=false;
+steerAng[i]=0; 
+leftSteerAng[i]=0;
+rightSteerAng[i]=0;
+steerAngMax[i]=.5; //.025;
+
+turboToggle[i]=false;
+turbo[i]=0;
+}//end set car array vars
+
+
+//make 'cars' (squares)
+for(var k=0;k<numCars;k++){
+
+car[k] = Bodies.rectangle(startPos[k].x, startPos[k].y, 4, 4, {
+angle: fixAngleRad(randRange(0,2*Math.PI)),
+restitution:.6,
+width:6,
+height:6,
+friction:0,
+render:{strokeStyle:'#000000',lineWidth:1, fillStyle: randHexColor()}
+}
+);
+
+if(k==ci){car[ci].render.lineWidth='2';}
+
+//using setMass to modify speed of cars, could also modify thruster value in keydowner
+Body.setMass(car[k], .7); 
+
+Matter.World.add(engine.world, [ car[k]]);
+
+car[k].plugin.wrap = {
+min: { x: render.bounds.min.x, y: render.bounds.min.y },
+max: { x: render.bounds.max.x, y: render.bounds.max.y }
+};
+
+}//end numCars loop
+
+
+//Matter.Engine.run(engine);
+var varSimRate=50;
+var simRate=1000/varSimRate; //(deltaTime in milliseconds per animation step)
+
+var showingFPS=false;
+var slower=true;
+//var shadower=false;//kills fps
+
+function componentToHex(c){
+var hex = c.toString(16);
+return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b){
+return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+
+
+//the ticker loop
+function ticker(){ 
+
+if(showingFPS){getFPS();}
+
+
+for(var i=0;i<numCars;i++){
+//very important: or else get flips at PI / -PI crossing
+Body.setAngle(car[i], fixAngleRad(car[i].angle));
+
+if(i!=ci){
+// check straight ahead, getImatgeData(x,y,width,height)
+{
+let aheadX=car[i].position.x+Math.cos(fixAngleRad(car[i].angle))*10;
+let aheadY=car[i].position.y+Math.sin(fixAngleRad(car[i].angle))*10;
+
+let cS=el('canvasBG').getContext('2d').getImageData(
+aheadX,
+aheadY,
+1,1);
+
+//road ends ahead, so check right and left
+if(cS.data[0]!=255&&aheadX>0&&aheadX<ww&&aheadY>0&&aheadY<hh){
+car[i].frictionAir=frictionAirDefault*3.0;
+carVel[i]*=.97;
+
+// check leftward ahead, getImatgeData(x,y,width,height)
+{let cR=el('canvasBG').getContext('2d').getImageData(
+car[i].position.x+Math.cos(fixAngleRad(car[i].angle-0.5))*4,	 
+car[i].position.y+Math.sin(fixAngleRad(car[i].angle-0.5))*4,
+1,1);
+
+//if road detected leftward
+if(cR.data[0]==255){
+steerLeft[i]=true; steerRight[i]=false;
+goBackward[i]=false
+}else{
+
+// check rightward ahead
+{
+let cL=el('canvasBG').getContext('2d').getImageData(
+car[i].position.x+Math.cos(fixAngleRad(car[i].angle+0.5))*4,
+car[i].position.y+Math.sin(fixAngleRad(car[i].angle+0.5))*4,
+1,1);
+
+if(cL.data[0]==255){
+steerRight[i]=true; steerLeft[i]=false;
+goBackward[i]=false;
+}else{
+//steerLeft[i]=false; steerRight[i]=false;
+goBackward[i]=true;
+}
+}//end check rightward ahead
+
+
+
+}//end road not detected leftward
+}//end check leftward ahead
+
+
+//if road continues straight ahead, do not turn
+}else{
+car[i].frictionAir=frictionAirDefault;
+steerRight[i]=false; steerLeft[i]=false;
+}
+}//end check rightward ahead
+
+}//end i!=ci
+
+
+if(steerRight[i]){rightSteerAng[i]=steerAngInc; leftSteerAng[i]=0;}
+else if(steerLeft[i]){leftSteerAng[i]=-steerAngInc; rightSteerAng[i]=0;}
+else{leftSteerAng[i]=0; rightSteerAng[i]=0;}
+
+
+if(Math.abs(steerAng[i])<steerAngMax[i]){
+steerAng[i]+=leftSteerAng[i] + rightSteerAng[i];
+steerAng[i]=fixAngleRad(steerAng[i]);
+}
+Body.rotate( car[i],  steerAng[i] * reverseDir[i]  ); 
+
+//speed limit
+if(Math.abs(carVel[i])<maxAccel[i]+turbo[i]){   
+
+
+if(goForward[i]){
+carVel[i]+=thrustInc; 
+reverseDir[i]=1;
+
+}else if(goBackward[i]){
+carVel[i]-=thrustInc;
+reverseDir[i]=-1;
+}
+
+goForward[i]=true;
+
+}else{  //when over speed limit
+carVel[i]*=.99;
+goForward[i]=false;
+}
+
+
+Body.applyForce(car[i],
+car[i].position, 
+{
+x:Math.cos(car[i].angle) * carVel[i], 
+y:Math.sin(car[i].angle) * carVel[i]
+} 
+);
+
+if(!goForward[i]&&!goBackward[i]){
+carVel[i]*=.98;
+}
+
+if(!steerLeft[i]&&!steerRight[i]){
+steerAng[i]*=.4;}
+
+}//end all cars loop
+
+
+if(!paused){
+window.requestAnimationFrame(ticker);
+}
+
+simRate=1000/varSimRate;
+Matter.Engine.update(engine, simRate);
+
+
+} //end ticker function
+
+
+
+function collisionOccurred(i,cx, cy, w){
+let newBounds={
+min:{x: cx - w, y: cy - w},
+max:{x: cx + w, y: cy + w}
+}
+for(var j=0;j<numCars;j++){
+if(j!=i){
+if(Bounds.overlaps(car[j].bounds, newBounds)){return true;}
+}
+}
+return false;
+}//end collision occurred
+
+
+
+
+// run the renderer
+Matter.Render.run(render);
+
+document.body.addEventListener("keydown", keydowner);
+document.body.addEventListener("keyup", keyupper);
+
+
+var altKey=false;
+//could use onkeypress for sustained keydown
+function keydowner(event){ 
+if(event.key=='z'){altKey=true;} 
+switch(event.key ){
+case '0':
+break;
+case '1':
+break;
+case '2':;
+break;
+case '3':
+break;
+case 'b': 
+break;
+case 'n': 
+if(altKey){varSimRate++;}else{
+varSimRate--;if(varSimRate<1){varSimRate=1;}
+}
+
+da('tester','varSimRate: '+varSimRate+' ---- millis between steps: '+ (1000/varSimRate).toFixed(2)+' speed: '+car[ci].speed.toFixed(2));
+
+break;
+case 'm':
+//reset to default view
+resetDefaultView();
+
+break;
+case 'i':
+
+break;
+case 'k':
+zoomRenderBounds(2,.8, .2);
+break;
+case 'f':
+zoomRenderBounds(.3,.1,.7);
+break;
+case 'c':
+zoomRenderBounds(4,.4,.5);
+break;
+case 't':
+break;
+case 'g':
+break;
+case 'v':
+ii++;if(ii>=imageFiles.length){ii=0;}
+bImg.src=imageFiles[ii];
+zImg.src=imageFiles[ii];
+resetDefaultView();
+break;
+case 'q':
+break;
+
+case 'h': 
+da('tester', car[0].position.x.toFixed(1));
+paused=!paused;if(!paused){ticker();document.title='running';}else{document.title='paused';}
+break;
+case ' ':
+turboToggle[ci]=!turboToggle[ci];
+if(turboToggle[ci]){turbo[ci]=.001;}else{
+turbo[ci]=0;}
+break;
+
+case 'w': case 'ArrowUp':
+goForward[ci]=true; 
+goBackward[ci]=false; 
+if(carVel[ci]<0){carVel[ci]=0;}
+break;
+
+case 's': case 'ArrowDown':
+goForward[ci]=false;
+goBackward[ci]=true; 
+if(carVel[ci]>0){carVel[ci]=0;}
+
+break;
+
+case 'a': case 'ArrowLeft': 
+steerLeft[ci]=true;  leftSteerAng[ci]=-steerAngInc; rightSteerAng[ci]=0;
+break;
+
+case 'd': case 'ArrowRight':
+steerRight[ci]=true; rightSteerAng[ci]=steerAngInc; leftSteerAng[ci]=0;
+break;
+
+
+case 'l':
+showingFPS=!showingFPS;if(!showingFPS){el('tester').style.display='none';}else{el('tester').style.display='block';}
+break;
+case 'o':
+break;
+case 'u':
+Body.scale(car[ci], .6, .6);
+car[ci].render.sprite.xScale*=.6;
+car[ci].render.sprite.yScale*=.6;
+Body.setMass(car[ci], 1.1);
+
+break;
+case 'y':
+showColor=true;
+break;
+case 'p': //extra tickers for faster animation
+ticker();
+break;
+}
+}//end keydowner
+
+function keyupper(event){
+if(event.key=='z'){altKey=false;}
+switch(event.key ){
+
+case 'w': case 'ArrowUp':
+goForward[ci]=false; thruster[ci]=0;
+break;
+
+case 's': case 'ArrowDown':
+goBackward[ci]=false; thruster[ci]=0;
+break;
+
+case 'a': case 'ArrowLeft':
+steerLeft[ci]=false; leftSteerAng[ci]=0;
+break;
+
+case 'd': case 'ArrowRight':
+steerRight[ci]=false; rightSteerAng[ci]=0;
+break;
+}
+}//end keyupper
+
+
+function setGravityAirFriction(g,fAir){
+engine.world.gravity.y=g;
+for(var i=0;i<numCars;i++){car[i].frictionAir=fAir;}
+}//end setGravityAirFriction function
+
+
+var dter=0;
+var thenner;
+var delayer=0;
+function getFPS(){
+if(typeof thenner==="undefined"){thenner=performance.now();}
+dter = performance.now()-thenner;
+thenner=performance.now();
+delayer++;if(delayer>60){delayer=0;
+da('tester', 'fps: '+parseInt(1000/dter));
+}
+}//end get fps
+
+
+function isFullScreen(){
+return (document.fullScreenElement && document.fullScreenElement !== null)
+|| document.mozFullScreen
+|| document.webkitIsFullScreen;
+}//end is full screen
+
+function requestFullScreen(){
+var el=document.documentElement;
+var rfs=el.requestFullscreen
+|| el.webkitRequestFullScreen
+|| el.mozRequestFullScreen
+|| el.msRequestFullscreen;
+rfs.call(el);
+}//end request full screen 
+
+function exitFullScreen(){
+var d=document;
+var rfs=d.exitFullscreen
+|| d.webkitExitFullscreen
+|| d.mozCancelFullScreen
+|| d.msExitFullscreen ;
+rfs.call(d);
+}//end exit fullscreen
+
+function toggleFullScreen(){
+if(isFullScreen()){exitFullScreen();
+}else{requestFullScreen();
+}
+}//end toggle full screen
+
+setGravityAirFriction( gravityDefault, frictionAirDefault );
+
+var delta=0;
+var zoom=1;
+var zoomW=ww, zoomH=hh, oldZoomW=zoomW, oldZoomH=zoomH;
+var zoomLeft=0, zoomTop=0;
+var zoomWi=ww, zoomHi=hh;
+var lefter=0, topper=0;
+var oldx=0, oldy=0;
+var dragging=false;
+
+
+//for panning and zooming centered on the cursor
+function mouseWheeler(event){
+delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+if(delta>0||delta<0){
+if(delta>0){zoom=1.2;}else{zoom=.8;}
+
+let mousex=event.clientX;
+let mousey=event.clientY;
+
+let L=zoomLeft+lefter;
+let T=zoomTop+topper;
+let mulx=(mousex-L)/zoomW;
+let muly=(mousey-T)/zoomH;
+zoomW*=zoom;
+zoomH*=zoom;
+zoomLeft+=(oldZoomW-zoomW)*mulx;
+zoomTop+=(oldZoomH-zoomH)*muly;
+
+//inverse zoom for bounds, big zoom = small bounds, zooming rightward shifts bounds leftward
+
+//inverse zoom
+zoomWi/=zoom;
+zoomHi/=zoom;
+
+//inverse left/top , right/bottom
+render.bounds.min.x=-(zoomLeft+lefter)*(ww/zoomW); 
+render.bounds.min.y=-(zoomTop+topper)*(hh/zoomH);
+render.bounds.max.x=render.bounds.min.x+zoomWi;  
+render.bounds.max.y=render.bounds.min.y+zoomHi; 
+
+el('canvasZoom').getContext('2d').clearRect(0,0,ww,hh);
+el('canvasZoom').getContext('2d').drawImage(bImg,
+zoomLeft+lefter,  
+zoomTop+topper,
+zoomW,
+zoomH);
+
+//so as squares wrap at edge disappear behind border, instead of winking in and out of existence
+borderW*=zoom;
+el('borderDiv').style.borderWidth=borderW+'px';
+//da('tester', borderW.toFixed(0));
+el('borderDiv').style.left=zoomLeft+lefter-borderW+'px';
+el('borderDiv').style.top=zoomTop+topper-borderW+'px';
+el('borderDiv').style.width=zoomW+'px';
+el('borderDiv').style.height=zoomH+'px';
+
+
+delta=0;
+oldZoomW=zoomW;
+oldZoomH=zoomH;
+}//if delta !==0
+
+}//end mouseWheeler
+
+document.body.onmousedown=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
+document.body.onmousewheel=function(){mouseWheeler(event);}
+document.body.onmouseup=function(){panMouseupper(event);}
+document.body.onmousemove=function(){panMousemover(event);}
+
+function panMousedowner(event){
+event.preventDefault();
+if(event.which!=3){dragging=true;}
+oldx=event.clientX; 
+oldy=event.clientY; 
+}//end mousedowner
+
+
+function panMouseupper(event){
+event.preventDefault();
+dragging=false;
+}//end mouseupper
+
+
+function panMousemover(event){ 
+event.preventDefault();
+
+if(dragging){ 
+lefter+=event.clientX-oldx;
+topper+=event.clientY-oldy;
+
+render.bounds.min.x=-(zoomLeft+lefter)*(ww/zoomW); 
+render.bounds.min.y=-(zoomTop+topper)*(hh/zoomH);
+render.bounds.max.x=render.bounds.min.x+zoomWi;  
+render.bounds.max.y=render.bounds.min.y+zoomHi;
+
+el('canvasZoom').getContext('2d').clearRect(0,0,ww,hh);
+el('canvasZoom').getContext('2d').drawImage(bImg,
+zoomLeft+lefter,  
+zoomTop+topper,
+zoomW,
+zoomH);
+
+el('borderDiv').style.left=zoomLeft+lefter-borderW+'px';
+el('borderDiv').style.top=zoomTop+topper-borderW+'px';
+
+oldx=event.clientX;
+oldy=event.clientY;
+
+}}//end mousemover
+
+
+//for zooming to various zoom levels centered on zoomTarget (fraction of ww)
+function zoomRenderBounds(zoomer, zoomTargetX, zoomTargetY){
+render.bounds.min.x=ww*((1-(1/zoomer))*zoomTargetX); 
+render.bounds.min.y=hh*((1-(1/zoomer))*zoomTargetY); 
+render.bounds.max.x=render.bounds.min.x+ww*(1/zoomer);
+render.bounds.max.y=render.bounds.min.y+hh*(1/zoomer); 
+
+el('canvasZoom').getContext('2d').clearRect(0,0,ww,hh);
+el('canvasZoom').getContext('2d').drawImage(bImg,
+(ww-ww*zoomer)*zoomTargetX,  
+(hh-hh*zoomer)*zoomTargetY,
+ww*zoomer,
+hh*zoomer);
+}//end zoom render bounds
+
+
+//reset to default view
+function resetDefaultView(){
+zoomLeft=0;
+zoomTop=0;
+lefter=0;
+topper=0;
+zoomW=ww;
+zoomH=hh;
+oldZoomW=zoomW;
+oldZoomH=zoomH;
+
+zoomLefti=0;
+zoomTopi=0;
+zoomWi=ww;
+zoomHi=hh;
+oldZoomWi=zoomWi;
+oldZoomHi=zoomHi;
+render.bounds.min.x=0;
+render.bounds.min.y=0;
+render.bounds.max.x=ww;
+render.bounds.max.y=hh;
+el('canvasZoom').getContext('2d').clearRect(0,0,ww,hh);
+el('canvasZoom').getContext('2d').drawImage(bImg,0,0,ww,hh);
+
+borderW=8;
+el('borderDiv').style.borderWidth=borderW+'px';
+el('borderDiv').style.width=ww+'px';
+el('borderDiv').style.height=hh+'px';
+el('borderDiv').style.left=-borderW+'px';
+el('borderDiv').style.top=-borderW+'px';
+}//end resetDefaultView
+
+
+el('canvid').focus();
+
+//so does not keep running when you are not on the page
+window.onblur=function(){paused=true;document.title='paused';}
+window.onfocus=function(){if(paused){paused=false;ticker();document.title='running';}}
+
+ticker();
+carReady=true;
+</script>
