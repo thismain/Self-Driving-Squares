@@ -53,6 +53,7 @@ function randHexColor(){return '#'+Math.floor(Math.random()*16777215).toString(1
 function subber(a,b){return {x:a.x-=b.x, y: a.y-=b.y};}
 
 var showHelp=false;
+var showQuestion=true;
 var imageFiles=['seamlessMapF.png','seamlessMap3.png'];
 var ii=0;
 var zoomer=false;
@@ -449,7 +450,8 @@ da('tester', '<b>Help: <span style="color:#00ff00">h</span> key</b><BR>'+
 '&bull; arrow keys to steer controllable square (fast black one)<BR>'+
 '&bull; <span style="color:#00ff00">i</span> key to load a new street map<BR>'+
 '&bull; <span style="color:#00ff00">p</span> key to pause/resume<BR>'+
-'&bull; <span style="color:#00ff00">f</span> key to show fps (mine is low, ~20)<BR>'
+'&bull; <span style="color:#00ff00">f</span> key to show fps (mine is low, ~20)<BR>'+
+'&bull; <span style="color:#00ff00">q</span> key to hide the question mark<BR>'
 );
 }//end displayHelp
 
@@ -511,6 +513,9 @@ break;
 case 'v':
 break;
 case 'q':
+showQuestion=!showQuestion;
+if(!showQuestion){el('helpDiv').style.display='none';
+}else{el('helpDiv').style.display='block';}
 break;
 
 
