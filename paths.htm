@@ -30,9 +30,9 @@ Both of the above images required processing, to change the width/height ratio, 
 <canvas id="canvid" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:1000;" ></canvas>
 <canvas id="canvasBG" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:900;"></canvas>
 <canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;"></canvas>
-<div id="borderDiv" style="z-index:100000;position:absolute;width:1px;height:1px;left:-10px;top:-10px;" ></div>
+<div id="borderDiv" style="z-index:9000;position:absolute;width:1px;height:1px;left:-10px;top:-10px;" ></div>
 
-<div id="tester" style="z-index:10000;position:absolute;top:100px;left:100px;color:black;background-color:white;font-family:monospace;font-size:20px;" ></div>
+<div id="tester" style="z-index:10000;position:absolute;top:100px;left:100px;color:black;background-color:white;font-family:monospace;font-size:20px;padding:6px;border:1px solid #000000;" ></div>
 
 </body>
 </html>
@@ -48,6 +48,7 @@ function randRange(min, max){return Math.floor(Math.random() * (max - min + 1)) 
 function randHexColor(){return '#'+Math.floor(Math.random()*16777215).toString(16);}
 function subber(a,b){return {x:a.x-=b.x, y: a.y-=b.y};}
 
+var showHelp=true;
 var imageFiles=['seamlessMapF.png','seamlessMap3.png'];
 var ii=0;
 var zoomer=false;
@@ -226,9 +227,6 @@ var steerAngMax=[];
 
 var thrustInc=.000003;
 var steerAngInc=.01;//.0013;
-var chasers=false;
-var turbo=[];
-var turboToggle=[];
 
 for(var i=0;i<numCars;i++){
 startPos[i]={x:randRange(5,ww-5),y:randRange(5,hh-5)};
@@ -247,8 +245,6 @@ leftSteerAng[i]=0;
 rightSteerAng[i]=0;
 steerAngMax[i]=.5; //.025;
 
-turboToggle[i]=false;
-turbo[i]=0;
 }//end set car array vars
 
 
@@ -283,10 +279,7 @@ max: { x: render.bounds.max.x, y: render.bounds.max.y }
 //Matter.Engine.run(engine);
 var varSimRate=50;
 var simRate=1000/varSimRate; //(deltaTime in milliseconds per animation step)
-
 var showingFPS=false;
-var slower=true;
-//var shadower=false;//kills fps
 
 function componentToHex(c){
 var hex = c.toString(16);
@@ -303,6 +296,19 @@ return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 function ticker(){ 
 
 if(showingFPS){getFPS();}
+
+else if(showHelp){
+da('tester', '<b>Help: h key</b><BR>'+
+'1) double click to reset to default view<BR>'+
+'2) mouse wheel to zoom in and out, centered on the cursor<BR>'+
+'3) left mouse button to pan<BR>'+
+'4) i key to load a new street map<BR>'+
+'5) middle mouse click to toggle fullscreen<BR>'+
+'6) arrow keys to steer controllable square, (heavier border)<BR>'+
+'7) h key to pause/resume<BR>'+
+'8) f key to show fps<BR>'
+);
+}else{el('tester').style.display='none';}
 
 
 for(var i=0;i<numCars;i++){
@@ -380,7 +386,7 @@ steerAng[i]=fixAngleRad(steerAng[i]);
 Body.rotate( car[i],  steerAng[i] * reverseDir[i]  ); 
 
 //speed limit
-if(Math.abs(carVel[i])<maxAccel[i]+turbo[i]){   
+if(Math.abs(carVel[i])<maxAccel[i]){   
 
 
 if(goForward[i]){
@@ -454,6 +460,7 @@ break;
 case 'b': 
 break;
 case 'n': 
+
 if(altKey){varSimRate++;}else{
 varSimRate--;if(varSimRate<1){varSimRate=1;}
 }
@@ -465,31 +472,34 @@ case 'm':
 resetDefaultView();
 break;
 case 'i':
-detectPageZoom();
+ii++;if(ii>=imageFiles.length){ii=0;}
+bImg.src=imageFiles[ii];
+zImg.src=imageFiles[ii];
+resetDefaultView();
 break;
 case 'k':
 break;
 case 'f':
+showingFPS=!showingFPS;
+if(showingFPS){showHelp=false;}
+break;
+case 'h': 
+showHelp=!showHelp;if(showHelp){showingFPS=false;}
 break;
 case 'c':
 break;
 case 't':
 break;
 case 'g':
+//extra tickers for faster animation
+ticker();
 break;
 case 'v':
-ii++;if(ii>=imageFiles.length){ii=0;}
-bImg.src=imageFiles[ii];
-zImg.src=imageFiles[ii];
-resetDefaultView();
 break;
 case 'q':
 break;
 
-case 'h': 
-da('tester', car[0].position.x.toFixed(1));
-paused=!paused;if(!paused){ticker();document.title='running';}else{document.title='paused';}
-break;
+
 case ' ':
 break;
 case 'w': case 'ArrowUp':
@@ -512,25 +522,16 @@ break;
 case 'd': case 'ArrowRight':
 steerRight[ci]=true; rightSteerAng[ci]=steerAngInc; leftSteerAng[ci]=0;
 break;
-
-
 case 'l':
-showingFPS=!showingFPS;if(!showingFPS){el('tester').style.display='none';}else{el('tester').style.display='block';}
 break;
 case 'o':
 break;
 case 'u':
-Body.scale(car[ci], .6, .6);
-car[ci].render.sprite.xScale*=.6;
-car[ci].render.sprite.yScale*=.6;
-Body.setMass(car[ci], 1.1);
-
 break;
 case 'y':
-showColor=true;
 break;
-case 'p': //extra tickers for faster animation
-ticker();
+case 'p': 
+paused=!paused;if(!paused){ticker();document.title='running';}else{document.title='paused';}
 break;
 }
 }//end keydowner
@@ -571,7 +572,7 @@ function getFPS(){
 if(typeof thenner==="undefined"){thenner=performance.now();}
 dter = performance.now()-thenner;
 thenner=performance.now();
-delayer++;if(delayer>60){delayer=0;
+delayer++;if(delayer>3){delayer=0;
 da('tester', 'fps: '+parseInt(1000/dter));
 }
 }//end get fps
@@ -810,17 +811,6 @@ render.options.pixelRatio=1;
 }//end detectPageZoom
 
 //help tips
-
-da('tester', '<b>Help:</b><BR>'+
-'1) double click to reset to default view<BR>'+
-'2) mouse wheel to zoom in and out, centered on the cursor<BR>'+
-'3) left mouse button to pan<BR>'+
-'4) v key to load a new street map<BR>'+
-'5) middle mouse click to toggle fullscreen<BR>'+
-'6) arrow keys to steer controllable square, (heavier border)<BR>');
-
-
-
 
 
 el('canvid').focus();
