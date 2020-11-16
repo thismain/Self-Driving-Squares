@@ -297,19 +297,6 @@ function ticker(){
 
 if(showingFPS){getFPS();}
 
-else if(showHelp){
-da('tester', '<b>Help: h key</b><BR>'+
-'1) double click to reset to default view<BR>'+
-'2) mouse wheel to zoom in and out, centered on the cursor<BR>'+
-'3) left mouse button to pan<BR>'+
-'4) i key to load a new street map<BR>'+
-'5) middle mouse click to toggle fullscreen<BR>'+
-'6) arrow keys to steer controllable square, (heavier border)<BR>'+
-'7) p key to pause/resume<BR>'+
-'8) f key to show fps<BR>'
-);
-}else{el('tester').style.display='none';}
-
 
 for(var i=0;i<numCars;i++){
 //very important: or else get flips at PI / -PI crossing
@@ -443,6 +430,21 @@ Matter.Render.run(render);
 document.body.addEventListener("keydown", keydowner);
 document.body.addEventListener("keyup", keyupper);
 
+function displayHelp(){
+showingFPS=false;
+da('tester', '<b>Help: h key</b><BR>'+
+'1) double click to reset to default view<BR>'+
+'2) mouse wheel to zoom in and out, centered on the cursor<BR>'+
+'3) left mouse button to pan<BR>'+
+'4) i key to load a new street map<BR>'+
+'5) middle mouse click to toggle fullscreen<BR>'+
+'6) arrow keys to steer controllable square, (heavier border)<BR>'+
+'7) p key to pause/resume<BR>'+
+'8) f key to show fps<BR>'
+);
+}//end displayHelp
+
+if(showHelp){displayHelp();}
 
 var altKey=false;
 //could use onkeypress for sustained keydown
@@ -481,10 +483,13 @@ case 'k':
 break;
 case 'f':
 showingFPS=!showingFPS;
-if(showingFPS){showHelp=false;}
+if(showingFPS){showHelp=false;}else{el('tester').style.display='none';}
 break;
 case 'h': 
-showHelp=!showHelp;if(showHelp){showingFPS=false;}
+showHelp=!showHelp;
+if(showHelp){ displayHelp();
+}else{el('tester').style.display='none';}
+
 break;
 case 'c':
 break;
