@@ -3,7 +3,7 @@
 November 15, 2020
 Live demo: http://drive.x10host.com/city/paths.htm  
   
-Tiny squares, which I refer to as cars, find their way along the streets in an image. You can also pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling the colors in the image.
+Tiny squares, which I refer to as cars, find their way along the streets in an image. You can also pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling the colors in the image. You can also control one of the squares with your arrow keys.  
   
 I am using the Matter.js  2d physics library for animation and rendering of the squares:  
 https://brm.io/matter-js/  
