@@ -463,7 +463,6 @@ da('tester','varSimRate: '+varSimRate+' ---- millis between steps: '+ (1000/varS
 break;
 case 'm':
 resetDefaultView();
-
 break;
 case 'i':
 detectPageZoom();
@@ -473,34 +472,8 @@ break;
 case 'f':
 break;
 case 'c':
-render.options.hasBounds=false;
 break;
 case 't':
-render.options.hasBounds=true;
-/*
-ww=window.innerWidth;
-hh=window.innerHeight;
-
-render.width=ww;
-render.height=hh;
-
-el('canvid').width=ww;
-el('canvid').style.width=ww+'px';
-el('canvid').height=hh;
-el('canvid').style.height=hh+'px';
-
-render.bounds.min.x=0;
-render.bounds.min.y=0;
-render.bounds.max.x=ww;
-render.bounds.max.y=hh;
-
-for(var k=0;k<numCars;k++){
-car[k].plugin.wrap = {
-min: { x: 0, y: 0 },
-max: { x: ww, y: hh }
-};
-}//end numCars
-*/
 break;
 case 'g':
 break;
@@ -518,11 +491,7 @@ da('tester', car[0].position.x.toFixed(1));
 paused=!paused;if(!paused){ticker();document.title='running';}else{document.title='paused';}
 break;
 case ' ':
-turboToggle[ci]=!turboToggle[ci];
-if(turboToggle[ci]){turbo[ci]=.001;}else{
-turbo[ci]=0;}
 break;
-
 case 'w': case 'ArrowUp':
 goForward[ci]=true; 
 goBackward[ci]=false; 
@@ -835,10 +804,22 @@ max: { x: ww, y: hh }
 
 resetDefaultView();
 render.options.pixelRatio=1;
-}
+}//end if ww!=innerWidth
 //da('tester', ww+' --- '+render.bounds.max.x.toFixed(0)+' '+render.options.width.toFixed(0));
 //da('tester', Math.round(window.devicePixelRatio * 100));
 }//end detectPageZoom
+
+//help tips
+
+da('tester', '<b>Help:</b><BR>'+
+'1) double click to reset to default view<BR>'+
+'2) mouse wheel to zoom in and out, centered on the cursor<BR>'+
+'3) left mouse button to pan<BR>'+
+'4) v key to load a new street map<BR>'+
+'5) middle mouse click to toggle fullscreen<BR>'+
+'6) arrow keys to steer controllable square, (heavier border)<BR>');
+
+
 
 
 
