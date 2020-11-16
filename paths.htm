@@ -235,7 +235,7 @@ goForward[i]=true;
 goBackward[i]=false;
 reverseDir[i]=1;
 thruster[i]=0;
-maxAccel[i]=.0006;
+maxAccel[i]=.0006; if(i==ci){maxAccel[i]=.001;}
 carVel[i]=maxAccel[i];
 
 steerLeft[i]=false;
@@ -261,7 +261,11 @@ render:{strokeStyle:'#000000',lineWidth:1, fillStyle: randHexColor()}
 }
 );
 
-if(k==ci){car[ci].render.lineWidth='2';}
+if(k==ci){
+car[ci].render.strokeStyle='#000000'
+car[ci].render.lineWidth='2';
+car[ci].render.fillStyle='#000000';
+}
 
 //using setMass to modify speed of cars, could also modify thruster value in keydowner
 Body.setMass(car[k], .7); 
@@ -438,13 +442,13 @@ da('tester', '<b>Help: h key</b><BR>'+
 '3) left mouse button to pan<BR>'+
 '4) i key to load a new street map<BR>'+
 '5) middle mouse click to toggle fullscreen<BR>'+
-'6) arrow keys to steer controllable square, (heavier border)<BR>'+
+'6) arrow keys to steer controllable square (fast black one)<BR>'+
 '7) p key to pause/resume<BR>'+
 '8) f key to show fps<BR>'
 );
 }//end displayHelp
 
-if(showHelp){displayHelp();}
+if(showHelp){displayHelp();setTimeout("showHelp=false;el('tester').style.display='none';",2000);}
 
 var altKey=false;
 //could use onkeypress for sustained keydown
