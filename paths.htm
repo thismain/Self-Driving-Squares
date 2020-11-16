@@ -427,7 +427,7 @@ window.requestAnimationFrame(ticker);
 simRate=1000/varSimRate;
 Matter.Engine.update(engine, simRate);
 
-detectPageZoom();
+detectBrowserZoom();
 //da('tester', hh+' '+render.bounds.max.y);
 } //end ticker function
 
@@ -464,7 +464,7 @@ case '0':
 break;
 case '1':
 break;
-case '2':;
+case '2':
 break;
 case '3':
 break;
@@ -771,7 +771,7 @@ el('borderDiv').style.boxShadow='inset 0px 0px 1px 1px #586474';
 }//end resetDefaultView
 
 
-function detectPageZoom(){
+function detectBrowserZoom(){
 if(ww!=window.innerWidth || hh!=window.innerHeight){ 
 
 oldww=ww; 
@@ -822,7 +822,7 @@ render.options.pixelRatio=1;
 }//end if ww!=innerWidth
 //da('tester', ww+' --- '+render.bounds.max.x.toFixed(0)+' '+render.options.width.toFixed(0));
 //da('tester', Math.round(window.devicePixelRatio * 100));
-}//end detectPageZoom
+}//end detectBrowserZoom
 
 //help tips
 
