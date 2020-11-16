@@ -16,5 +16,5 @@ and
 https://depositphotos.com/68246427/stock-illustration-minimal-city-map-for-gps.html  
 https://st2.depositphotos.com/4559651/6824/v/950/depositphotos_68246427-stock-illustration-minimal-city-map-for-gps.jpg  
   
-The images required processing, to change the width/height ratio, and to remove the non-white pixels from the streets, for doing which I used Gimp.  
+The images required some manual processing, to change the width/height ratio, and to remove the non-white pixels from the streets, for doing which I used Gimp.  
   
