@@ -35,7 +35,7 @@ The images required some manual processing, to change the width/height ratio, an
 <canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;"></canvas>
 <div id="borderDiv" style="z-index:9000;position:absolute;width:1px;height:1px;left:-10px;top:-10px;" ></div>
 
-<div id="tester" style="display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;" onmousedown="showHelp=false;this.style.display='none';"></div>
+<div id="tester" style="display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;" onclick="showHelp=false;this.style.display='none';"></div>
 
 
 <div id="helpDiv" style="z-index:10000;position:absolute;top:4;left:4px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:16px;padding-top:0px;padding-bottom:0px;padding-right:6px;padding-left:6px;border:2px solid #ffffff;opacity:.3;cursor:pointer;" onmousedown="this.style.backgroundColor='#00ff00';showHelp=!showHelp;if(showHelp){displayHelp();}else{el('tester').style.display='none';}" onmouseup="this.style.backgroundColor='#000000';" onmouseover="this.style.backgroundColor='#00800f';" onmouseout="this.style.backgroundColor='#000000';"><b>?</b></div>
@@ -454,7 +454,8 @@ da('tester', '<b>Help: <span style="color:#00ff00">h</span> key</b><BR>'+
 '&bull; <span style="color:#00ff00">i</span> key to load a new street map<BR>'+
 '&bull; <span style="color:#00ff00">p</span> key to pause/resume<BR>'+
 '&bull; <span style="color:#00ff00">f</span> key to show fps<BR>'+
-'&bull; <span style="color:#00ff00">q</span> key to hide the question mark<BR>'
+'&bull; <span style="color:#00ff00">q</span> key to hide the question mark<BR>'+
+'&bull; <a target="_blank" href="https://github.com/thismain/self_driving_squares_using_matter.js">files on github</a>'
 );
 }//end displayHelp
 
