@@ -15,6 +15,9 @@ https://thumbs.dreamstime.com/b/city-seamless-vector-wallpaper-5056574.jpg
 and  
 https://depositphotos.com/68246427/stock-illustration-minimal-city-map-for-gps.html  
 https://st2.depositphotos.com/4559651/6824/v/950/depositphotos_68246427-stock-illustration-minimal-city-map-for-gps.jpg  
+and
+https://depositphotos.com/9519225/stock-illustration-seamless-background-of-abstract-city.html  
+https://static8.depositphotos.com/1303735/951/v/950/depositphotos_9519225-stock-illustration-seamless-background-of-abstract-city.jpg  
   
 The images required some manual processing, to change the width/height ratio, and to remove the non-white pixels from the streets, for doing which I used Gimp.  
   
