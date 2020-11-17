@@ -1,4 +1,4 @@
-# SelfDrivingSquares
+# Self-Driving-Squares
 
 November 15, 2020
 Live demo: http://drive.x10host.com/city/paths.htm  
