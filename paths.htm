@@ -1,7 +1,8 @@
 <html>
 <head>
+<title>Self-Driving-Squares</title>
 <!--
-# self_driving_squares
+# Self-Driving-Squares
 
 November 15, 2020
 Live demo: http://drive.x10host.com/city/paths.htm  
@@ -185,7 +186,9 @@ el('canvasBG').getContext('2d').drawImage(bImg,0,0,ww,hh);
 
 var zImg=new Image();
 zImg.src=imageFiles[ii]; 
+da('tester', 'Loading Street Map Image...');
 zImg.onload=function(){
+el('tester').style.display='none';
 setZimg();
 }//end onload function for zImg
 
@@ -490,6 +493,7 @@ resetDefaultView();
 break;
 case 'i':
 ii++;if(ii>=imageFiles.length){ii=0;}
+da('tester', 'Loading Street Map Image...');
 bImg.src=imageFiles[ii];
 zImg.src=imageFiles[ii];
 resetDefaultView();
@@ -554,7 +558,7 @@ break;
 case 'y':
 break;
 case 'p': 
-paused=!paused;if(!paused){ticker();document.title='running';}else{document.title='paused';}
+paused=!paused;if(!paused){ticker();document.title='running - Self Driving Squares';}else{document.title='paused - Self Driving Squares';}
 break;
 }
 }//end keydowner
@@ -839,8 +843,8 @@ render.options.pixelRatio=1;
 el('canvid').focus();
 
 //so does not keep running when you are not on the page
-window.onblur=function(){paused=true;document.title='paused';}
-window.onfocus=function(){if(paused){paused=false;ticker();document.title='running';}}
+window.onblur=function(){paused=true;document.title='paused - Self Driving Squares';}
+window.onfocus=function(){if(paused){paused=false;ticker();document.title='running - Self Driving Squares';}}
 
 ticker();
 </script>
