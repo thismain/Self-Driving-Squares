@@ -1,4 +1,4 @@
-# city_streets_using_matter.js
+# self_driving_squares_using_matter.js
 
 November 15, 2020
 Live demo: http://drive.x10host.com/city/paths.htm  
