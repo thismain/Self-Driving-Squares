@@ -19,12 +19,13 @@ https://thumbs.dreamstime.com/b/city-seamless-vector-wallpaper-5056574.jpg
 and  
 https://depositphotos.com/68246427/stock-illustration-minimal-city-map-for-gps.html  
 https://st2.depositphotos.com/4559651/6824/v/950/depositphotos_68246427-stock-illustration-minimal-city-map-for-gps.jpg  
-and 
+and  
 https://depositphotos.com/9519225/stock-illustration-seamless-background-of-abstract-city.html  
 https://static8.depositphotos.com/1303735/951/v/950/depositphotos_9519225-stock-illustration-seamless-background-of-abstract-city.jpg  
+and  
+https://www.google.com/maps/  
   
 The images required some manual processing, to change the width/height ratio, and to remove the non-white pixels from the streets, for doing which I used Gimp.  
-  
 -->
 <script src="matter.js"></script>
 <script src="matter-wrap.js"></script>
@@ -58,7 +59,7 @@ function subber(a,b){return {x:a.x-=b.x, y: a.y-=b.y};}
 
 var showHelp=false;
 var showQuestion=true;
-var imageFiles=['seamlessMapF.png','seamlessMap3.png','seamlessMap7.png'];
+var imageFiles=['seamlessMapF.png','seamlessMap3.png','seamlessMap7.png','googleMap3.png'];
 var ii=2;
 var zoomer=false;
 var paused=false;
@@ -227,7 +228,6 @@ var goForward=[];
 var goBackward=[];
 var reverseDir=[];
 var carVel=[];
-var thruster=[];
 var maxAccel=[];
 
 var steerLeft=[];
@@ -239,15 +239,19 @@ var steerAngMax=[];
 
 var thrustInc=.000003;
 var steerAngInc=.01;//.0013;
+var colliding=[];
+var collisionThrust=[];
+var leftSpin=[];
+var rightSpin=[];
 
-for(var i=0;i<numCars;i++){
+function setCarDefaults(){
+for(let i=0;i<numCars;i++){
 startPos[i]={x:randRange(5,ww-5),y:randRange(5,hh-5)};
 
 goForward[i]=true;
 goBackward[i]=false;
 reverseDir[i]=1;
-thruster[i]=0;
-maxAccel[i]=.0006; if(i==ci){maxAccel[i]=.001;}
+maxAccel[i]=.0008; if(i==ci){maxAccel[i]=.001;}
 carVel[i]=maxAccel[i];
 
 steerLeft[i]=false;
@@ -256,16 +260,23 @@ steerAng[i]=0;
 leftSteerAng[i]=0;
 rightSteerAng[i]=0;
 steerAngMax[i]=.5; //.025;
-
+colliding[i]=false;
+collisionThrust[i]=0;
+leftSpin[i]=false;
+rightSpin[i]=false;
 }//end set car array vars
+}//end setCarDefaults
+
+setCarDefaults();
 
 
 //make 'cars' (squares)
-for(var k=0;k<numCars;k++){
+for(let k=0;k<numCars;k++){
 
 car[k] = Bodies.rectangle(startPos[k].x, startPos[k].y, 4, 4, {
 angle: fixAngleRad(randRange(0,2*Math.PI)),
 restitution:.6,
+id:k,
 width:6,
 height:6,
 friction:0,
@@ -275,12 +286,11 @@ render:{strokeStyle:'#000000',lineWidth:1, fillStyle: randHexColor()}
 
 if(k==ci){
 car[ci].render.strokeStyle='#000000'
-car[ci].render.lineWidth='2';
 car[ci].render.fillStyle='#000000';
 }
 
-//using setMass to modify speed of cars, could also modify thruster value in keydowner
-Body.setMass(car[k], .7); 
+//using setMass to modify speed of cars
+Body.setMass(car[k], .5); 
 
 Matter.World.add(engine.world, [ car[k]]);
 
@@ -314,22 +324,29 @@ function ticker(){
 if(showingFPS){getFPS();}
 
 
-for(var i=0;i<numCars;i++){
+for(let i=0;i<numCars;i++){
 //very important: or else get flips at PI / -PI crossing
 Body.setAngle(car[i], fixAngleRad(car[i].angle));
 
 if(i!=ci){
+
+
+if(collisionOccurred(false, i,car[i].position.x, car[i].position.y, car[i].width*2)){
+collisionThrust[i]=.000007;}else{collisionThrust[i]=0;}
+
+
+
 // check straight ahead, getImatgeData(x,y,width,height)
 {
-let aheadX=car[i].position.x+Math.cos(fixAngleRad(car[i].angle))*10;
-let aheadY=car[i].position.y+Math.sin(fixAngleRad(car[i].angle))*10;
+let aheadX=car[i].position.x+Math.cos(fixAngleRad(car[i].angle))*(10+carVel[i]*10000);
+let aheadY=car[i].position.y+Math.sin(fixAngleRad(car[i].angle))*(10+carVel[i]*10000);
 
 let cS=el('canvasBG').getContext('2d').getImageData(
 aheadX,
 aheadY,
 1,1);
 
-//road ends ahead, so check right and left
+//road ends ahead, so check right and left, if at edge just keep going
 if(cS.data[0]!=255&&aheadX>0&&aheadX<ww&&aheadY>0&&aheadY<hh){
 car[i].frictionAir=frictionAirDefault*3.0;
 carVel[i]*=.97;
@@ -342,6 +359,7 @@ car[i].position.y+Math.sin(fixAngleRad(car[i].angle-0.5))*4,
 
 //if road detected leftward
 if(cR.data[0]==255){
+car[i].frictionAir=frictionAirDefault*2;
 steerLeft[i]=true; steerRight[i]=false;
 goBackward[i]=false
 }else{
@@ -354,6 +372,7 @@ car[i].position.y+Math.sin(fixAngleRad(car[i].angle+0.5))*4,
 1,1);
 
 if(cL.data[0]==255){
+car[i].frictionAir=frictionAirDefault*2;
 steerRight[i]=true; steerLeft[i]=false;
 goBackward[i]=false;
 }else{
@@ -377,9 +396,23 @@ steerRight[i]=false; steerLeft[i]=false;
 }//end i!=ci
 
 
-if(steerRight[i]){rightSteerAng[i]=steerAngInc; leftSteerAng[i]=0;}
-else if(steerLeft[i]){leftSteerAng[i]=-steerAngInc; rightSteerAng[i]=0;}
-else{leftSteerAng[i]=0; rightSteerAng[i]=0;}
+
+
+
+if(steerRight[i]){rightSteerAng[i]=steerAngInc; leftSteerAng[i]=0;
+rightSpin[i]++;
+leftSpin[i]=0;
+if(rightSpin[i]>50){collisionThrust[i]=.001;rightSpin[i]=0;steerRight[i]=false;}
+
+}else if(steerLeft[i]){leftSteerAng[i]=-steerAngInc; rightSteerAng[i]=0;
+leftSpin[i]++;
+rightSpin[i]=0;
+if(leftSpin[i]>50){collisionThrust[i]=.001;leftSpin[i]=0;steerLeft[i]=false;}
+
+}else{
+rightSpin[i]=0;leftSpin[i]=0;
+leftSteerAng[i]=0; rightSteerAng[i]=0;
+}
 
 
 if(Math.abs(steerAng[i])<steerAngMax[i]){
@@ -389,15 +422,15 @@ steerAng[i]=fixAngleRad(steerAng[i]);
 Body.rotate( car[i],  steerAng[i] * reverseDir[i]  ); 
 
 //speed limit
-if(Math.abs(carVel[i])<maxAccel[i]){   
+if(Math.abs(carVel[i])<maxAccel[i]||colliding[i]){   
 
 
 if(goForward[i]){
-carVel[i]+=thrustInc; 
+carVel[i]+=thrustInc+collisionThrust[i]; 
 reverseDir[i]=1;
 
 }else if(goBackward[i]){
-carVel[i]-=thrustInc;
+carVel[i]-=thrustInc+collisionThrust[i];
 reverseDir[i]=-1;
 }
 
@@ -437,6 +470,26 @@ Matter.Engine.update(engine, simRate);
 detectBrowserZoom();
 //da('tester', hh+' '+render.bounds.max.y);
 } //end ticker function
+
+
+
+function collisionOccurred(m,i,cx, cy, w){
+let newBounds={
+min:{x: cx - w, y: cy - w},
+max:{x: cx + w, y: cy + w}
+}
+for(let j=0;j<numCars;j++){
+if(j!=i&&j!=ci){
+if(Bounds.overlaps(car[j].bounds, newBounds)){
+if(m){da('tester',car[j].id+' '+ leftSteerAng[j]+' '+rightSteerAng[j]+' '+steerLeft[j]+' '+steerRight[j]);}
+colliding[j]=true;
+return true;
+}
+}
+}
+return false;
+}//end collision occurred
+
 
 
 
@@ -497,6 +550,7 @@ da('tester', 'Loading Street Map Image...');
 bImg.src=imageFiles[ii];
 zImg.src=imageFiles[ii];
 resetDefaultView();
+setCarDefaults();
 break;
 case 'k':
 break;
@@ -568,11 +622,11 @@ if(event.key=='z'){altKey=false;}
 switch(event.key ){
 
 case 'w': case 'ArrowUp':
-goForward[ci]=false; thruster[ci]=0;
+goForward[ci]=false; 
 break;
 
 case 's': case 'ArrowDown':
-goBackward[ci]=false; thruster[ci]=0;
+goBackward[ci]=false; 
 break;
 
 case 'a': case 'ArrowLeft':
@@ -588,7 +642,7 @@ break;
 
 function setGravityAirFriction(g,fAir){
 engine.world.gravity.y=g;
-for(var i=0;i<numCars;i++){car[i].frictionAir=fAir;}
+for(let i=0;i<numCars;i++){car[i].frictionAir=fAir;}
 }//end setGravityAirFriction function
 
 
@@ -701,6 +755,7 @@ oldZoomH=zoomH;
 
 }//end mouseWheeler
 
+document.body.onclick=function(){collisionOccurred(true,2,event.clientX,event.clientY,car[0].width*4);}
 document.body.ondblclick=function(){resetDefaultView();}
 document.body.onmousedown=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
 document.body.onmousewheel=function(){mouseWheeler(event);}
@@ -813,7 +868,7 @@ w_zoomRatio=ww/oldww;
 h_zoomRatio=hh/oldhh;
 //da('tester', ww.toFixed(0)+' '+oldww.toFixed(0)+' '+w_zoomRatio.toFixed(4));
 
-for(var k=0;k<numCars;k++){
+for(let k=0;k<numCars;k++){
 
 
 Body.translate(car[k], 
