@@ -481,7 +481,7 @@ max:{x: cx + w, y: cy + w}
 for(let j=0;j<numCars;j++){
 if(j!=i&&j!=ci){
 if(Bounds.overlaps(car[j].bounds, newBounds)){
-if(m){da('tester',car[j].id+' '+ leftSteerAng[j]+' '+rightSteerAng[j]+' '+steerLeft[j]+' '+steerRight[j]);}
+//if(m){da('tester',car[j].id+' '+ leftSteerAng[j]+' '+rightSteerAng[j]+' '+steerLeft[j]+' '+steerRight[j]);}
 colliding[j]=true;
 return true;
 }
@@ -755,7 +755,7 @@ oldZoomH=zoomH;
 
 }//end mouseWheeler
 
-document.body.onclick=function(){collisionOccurred(true,2,event.clientX,event.clientY,car[0].width*4);}
+//document.body.onclick=function(){collisionOccurred(true,2,event.clientX,event.clientY,car[0].width*4);}
 document.body.ondblclick=function(){resetDefaultView();}
 document.body.onmousedown=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
 document.body.onmousewheel=function(){mouseWheeler(event);}
