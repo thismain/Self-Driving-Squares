@@ -59,8 +59,8 @@ function subber(a,b){return {x:a.x-=b.x, y: a.y-=b.y};}
 
 var showHelp=false;
 var showQuestion=true;
-var imageFiles=['seamlessMapF.png','seamlessMap3.png','seamlessMap7.png','googleMap3.png','googleMap12.png','googleMap16.png','googleMap18.png'];
-var ii=6;
+var imageFiles=['seamlessMapF.png','seamlessMap3.png','seamlessMap7.png','googleMap3.png','googleMap18.png','googleMap32.png'];
+var ii=imageFiles.length-1;
 var zoomer=false;
 var paused=false;
 var numCars=200;
@@ -336,8 +336,8 @@ collisionThrust[i]=.000007;}else{collisionThrust[i]=0;}
 
 // check straight ahead, getImatgeData(x,y,width,height)
 {
-let aheadX=car[i].position.x+Math.cos(fixAngleRad(car[i].angle))*(10+carVel[i]*10000);
-let aheadY=car[i].position.y+Math.sin(fixAngleRad(car[i].angle))*(10+carVel[i]*10000);
+let aheadX=car[i].position.x+Math.cos(fixAngleRad(car[i].angle))*(10+Math.abs(carVel[i])*10000);
+let aheadY=car[i].position.y+Math.sin(fixAngleRad(car[i].angle))*(10+Math.abs(carVel[i])*10000);
 
 let cS=el('canvasBG').getContext('2d').getImageData(
 aheadX,
@@ -543,7 +543,9 @@ case 'm':
 resetDefaultView();
 break;
 case 'i':
+if(!altKey){ii--; if(ii<0){ii=imageFiles.length-1;}}else{
 ii++;if(ii>=imageFiles.length){ii=0;}
+}
 da('tester', 'Loading Street Map Image...');
 bImg.src=imageFiles[ii];
 zImg.src=imageFiles[ii];
