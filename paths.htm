@@ -269,12 +269,10 @@ rightSpin[i]=false;
 
 //remove cars
 function removeCars(){
-if(numCars>50){
 for(let k=oldNumCars-1;k>numCars-1;k--){
 Matter.World.remove(engine.world, [car[k]]);
 }
 oldNumCars=numCars
-}
 }//end removeCars
 
 
@@ -344,6 +342,7 @@ return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 
 //the ticker loop
 function ticker(){ 
+da('tester', numCars+' '+oldNumCars);
 if(!changingNumCars){
 
 if(showingFPS){getFPS();}
