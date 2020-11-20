@@ -64,6 +64,7 @@ var ii=imageFiles.length-1;
 var zoomer=false;
 var paused=false;
 var numCars=200;
+var changingNumCars=false;
 
 var ww=window.innerWidth;
 var oldww=ww;
@@ -266,10 +267,18 @@ rightSpin[i]=false;
 }//end set car array vars
 }//end setCarDefaults
 
-setCarDefaults();
+
+//remove cars
+function removeCars(){
+changingNumCars=true;
+for(let k=0;k<numCars;k++){
+Matter.World.remove(engine.world, [ car[k]]);
+}
+}//end removeCars
 
 
 //make 'cars' (squares)
+function makeCars(){
 for(let k=0;k<numCars;k++){
 
 car[k] = Bodies.rectangle(startPos[k].x, startPos[k].y, 4, 4, {
@@ -299,7 +308,15 @@ max: { x: render.bounds.max.x, y: render.bounds.max.y }
 };
 
 }//end numCars loop
+}//end make cars
 
+function initCars(){
+setCarDefaults();
+makeCars();
+changingNumCars=false;
+}//end initCars
+
+initCars();
 
 //Matter.Engine.run(engine);
 var varSimRate=60;
@@ -319,6 +336,7 @@ return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 
 //the ticker loop
 function ticker(){ 
+if(!changingNumCars){
 
 if(showingFPS){getFPS();}
 
@@ -469,6 +487,7 @@ Matter.Engine.update(engine, simRate);
 
 detectBrowserZoom();
 //da('tester', hh+' '+render.bounds.max.y);
+}//end !changingNumCars
 } //end ticker function
 
 
@@ -507,6 +526,8 @@ da('tester', '<b>Help: <span style="color:#00ff00">h</span> key</b><BR>'+
 '&bull; middle mouse click to toggle fullscreen<BR>'+
 '&bull; double click to reset to default view (after panning and zooming)<BR>'+
 '&bull; arrow keys to steer controllable square (fast black one)<BR>'+
+'&bull; <span style="color:#00ff00">v</span> key to add 50 cars<BR>'+
+'&bull; <span style="color:#00ff00">c</span> key to remove 50 cars<BR>'+
 '&bull; <span style="color:#00ff00">i</span> key to load a new street map<BR>'+
 '&bull; <span style="color:#00ff00">p</span> key to pause/resume<BR>'+
 '&bull; <span style="color:#00ff00">f</span> key to show fps<BR>'+
@@ -566,7 +587,17 @@ if(showHelp){ displayHelp();
 }else{el('tester').style.display='none';}
 
 break;
+case 'v':
+removeCars();
+numCars+=50;
+initCars();
+break;
 case 'c':
+if(numCars>50){
+removeCars();
+numCars-=50;
+initCars();
+}
 break;
 case 't':
 break;
@@ -574,8 +605,7 @@ case 'g':
 //extra tickers for faster animation
 ticker();
 break;
-case 'v':
-break;
+
 case 'q':
 showQuestion=!showQuestion;
 if(!showQuestion){el('helpDiv').style.display='none';
