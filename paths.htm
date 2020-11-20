@@ -99,6 +99,7 @@ Common = Matter.Common,
 Common = Matter.Common,
 Bounds = Matter.Bounds,
 Events = Matter.Events;
+//Detector=Matter.Detector;
 
 
 // create an engine
@@ -237,7 +238,7 @@ var steerAngMax=[];
 
 var thrustInc=.000003;
 var steerAngInc=.01;//.0013;
-var colliding=[];
+var almostColliding=[];
 var collisionThrust=[];
 var leftSpin=[];
 var rightSpin=[];
@@ -258,7 +259,7 @@ steerAng[i]=0;
 leftSteerAng[i]=0;
 rightSteerAng[i]=0;
 steerAngMax[i]=.5; //.025;
-colliding[i]=false;
+almostColliding[i]=false;
 collisionThrust[i]=0;
 leftSpin[i]=false;
 rightSpin[i]=false;
@@ -329,7 +330,8 @@ Body.setAngle(car[i], fixAngleRad(car[i].angle));
 if(i!=ci){
 
 
-if(collisionOccurred(false, i,car[i].position.x, car[i].position.y, car[i].width*2)){
+//preventing jams by increasing thrust of almost colliding cars
+if(collisionAlmostOccurring(i,car[i].position.x, car[i].position.y, car[i].width*2)){
 collisionThrust[i]=.000007;}else{collisionThrust[i]=0;}
 
 
@@ -420,7 +422,7 @@ steerAng[i]=fixAngleRad(steerAng[i]);
 Body.rotate( car[i],  steerAng[i] * reverseDir[i]  ); 
 
 //speed limit
-if(Math.abs(carVel[i])<maxAccel[i]||colliding[i]){   
+if(Math.abs(carVel[i])<maxAccel[i]||almostColliding[i]){   
 
 
 if(goForward[i]){
@@ -470,25 +472,25 @@ detectBrowserZoom();
 } //end ticker function
 
 
-
-function collisionOccurred(m,i,cx, cy, w){
-let newBounds={
+//check if wider bounds than collision bounds are overlapping
+function collisionAlmostOccurring(i,cx, cy, w){
+let thisCarBounds={
 min:{x: cx - w, y: cy - w},
 max:{x: cx + w, y: cy + w}
 }
-for(let j=0;j<numCars;j++){
-if(j!=i&&j!=ci){
-if(Bounds.overlaps(car[j].bounds, newBounds)){
-//if(m){da('tester',car[j].id+' '+ leftSteerAng[j]+' '+rightSteerAng[j]+' '+steerLeft[j]+' '+steerRight[j]);}
-colliding[j]=true;
+for(let j=0;j<engine.pairs.list.length;j++){
+let ida=engine.pairs.list[j].bodyA.id;
+let idb=engine.pairs.list[j].bodyB.id;
+if((ida!=i&&Bounds.overlaps(car[ida].bounds, thisCarBounds))||(idb!=i&&
+Bounds.overlaps(car[idb].bounds, thisCarBounds))){
+almostColliding[i]=true;
+car[i].render.lineWidth=2;
 return true;
-}
-}
-}
+}//if overlapping
+}//for all broadphase pairs
+car[i].render.lineWidth=1;
 return false;
-}//end collision occurred
-
-
+}//end collision almost occurring
 
 
 // run the renderer
@@ -755,7 +757,6 @@ oldZoomH=zoomH;
 
 }//end mouseWheeler
 
-//document.body.onclick=function(){collisionOccurred(true,2,event.clientX,event.clientY,car[0].width*4);}
 document.body.ondblclick=function(){resetDefaultView();}
 document.body.onmousedown=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
 document.body.onmousewheel=function(){mouseWheeler(event);}
