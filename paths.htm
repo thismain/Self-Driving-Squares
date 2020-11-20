@@ -105,6 +105,7 @@ Events = Matter.Events;
 
 // create an engine
 var engine = Matter.Engine.create(); 
+engine.world.gravity.y=0;
 
 // create a renderer
 var render = Matter.Render.create(
@@ -214,13 +215,9 @@ el('borderDiv').style.border=borderW+'px solid #ffffff'; //748090
 el('borderDiv').style.boxShadow='inset 0px 0px 1px 1px #586474';
 
 
-
-
-
 var car=[];
 var ci=0;
 var startPos=[];
-var gravityDefault=0;
 var frictionAirDefault=.22;
 //var carColor=['#000000','#ff0033','#0091ff','#a600ff'];
 
@@ -272,7 +269,7 @@ rightSpin[i]=false;
 function removeCars(){
 changingNumCars=true;
 for(let k=0;k<numCars;k++){
-Matter.World.remove(engine.world, [ car[k]]);
+Matter.World.remove(engine.world, [car[k]]);
 }
 }//end removeCars
 
@@ -302,10 +299,13 @@ Body.setMass(car[k], .5);
 
 Matter.World.add(engine.world, [ car[k]]);
 
+car[k].frictionAir=frictionAirDefault;
+
 car[k].plugin.wrap = {
 min: { x: render.bounds.min.x, y: render.bounds.min.y },
 max: { x: render.bounds.max.x, y: render.bounds.max.y }
 };
+
 
 }//end numCars loop
 }//end make cars
@@ -345,13 +345,12 @@ for(let i=0;i<numCars;i++){
 //very important: or else get flips at PI / -PI crossing
 Body.setAngle(car[i], fixAngleRad(car[i].angle));
 
-if(i!=ci){
 
+if(i!=ci){
 
 //preventing jams by increasing thrust of almost colliding cars
 if(collisionAlmostOccurring(i,car[i].position.x, car[i].position.y, car[i].width*2)){
 collisionThrust[i]=.000007;}else{collisionThrust[i]=0;}
-
 
 
 // check straight ahead, getImatgeData(x,y,width,height)
@@ -672,12 +671,6 @@ break;
 }//end keyupper
 
 
-function setGravityAirFriction(g,fAir){
-engine.world.gravity.y=g;
-for(let i=0;i<numCars;i++){car[i].frictionAir=fAir;}
-}//end setGravityAirFriction function
-
-
 var dter=0;
 var thenner;
 var delayer=0;
@@ -721,7 +714,7 @@ if(isFullScreen()){exitFullScreen();
 }
 }//end toggle full screen
 
-setGravityAirFriction( gravityDefault, frictionAirDefault );
+
 
 var delta=0;
 var zoom=1;
