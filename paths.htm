@@ -276,6 +276,9 @@ Matter.World.remove(engine.world, [car[k]]);
 
 //make 'cars' (squares)
 function makeCars(){
+resetDefaultView();
+render.options.pixelRatio=1;
+
 for(let k=0;k<numCars;k++){
 
 car[k] = Bodies.rectangle(startPos[k].x, startPos[k].y, 4, 4, {
