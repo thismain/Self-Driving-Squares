@@ -361,8 +361,8 @@ collisionThrust[i]=.000007;}else{collisionThrust[i]=0;}
 
 // check straight ahead, getImatgeData(x,y,width,height)
 {
-let aheadX=car[i].position.x+Math.cos(fixAngleRad(car[i].angle))*(8+Math.abs(carVel[i])*10000);
-let aheadY=car[i].position.y+Math.sin(fixAngleRad(car[i].angle))*(8+Math.abs(carVel[i])*10000);
+let aheadX=car[i].position.x+Math.cos(fixAngleRad(car[i].angle))*(12+Math.abs(carVel[i])*3000);
+let aheadY=car[i].position.y+Math.sin(fixAngleRad(car[i].angle))*(12+Math.abs(carVel[i])*3000);
 
 let cS=el('canvasBG').getContext('2d').getImageData(
 aheadX,
@@ -376,8 +376,8 @@ carVel[i]*=.97;
 
 // check leftward ahead, getImatgeData(x,y,width,height)
 {let cR=el('canvasBG').getContext('2d').getImageData(
-car[i].position.x+Math.cos(fixAngleRad(car[i].angle-0.5))*4,	 
-car[i].position.y+Math.sin(fixAngleRad(car[i].angle-0.5))*4,
+car[i].position.x+Math.cos(fixAngleRad(car[i].angle-0.5))*7,	 
+car[i].position.y+Math.sin(fixAngleRad(car[i].angle-0.5))*7,
 1,1);
 
 //if road detected leftward
