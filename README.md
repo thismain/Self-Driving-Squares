@@ -4,7 +4,7 @@ November 15, 2020
 Live demo: http://drive.x10host.com/city/paths.htm  
 [![screenshot](https://github.com/thismain/Self-Driving-Squares/blob/main/screenshot2.png?raw=true)](http://drive.x10host.com/city/paths.htm)  
   
-Tiny squares, which I refer to as cars, find their way along the streets in an image. You can pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling the colors in the image. You can also control one of the squares with your arrow keys. There are a few different images to try out. Here are the shortcut keys: 
+Tiny squares, which I refer to as cars, find their way along the streets in an image. Pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling the colors in the image. There are a few different street maps to try. Here are the shortcut keys: 
 <ul>
 <li>left mouse button to pan</li>
 <li>mouse wheel to zoom in and out, centered on the cursor</li>
