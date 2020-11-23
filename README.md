@@ -6,7 +6,7 @@ Live demo: http://drive.x10host.com/city/paths.htm
   
 Tiny squares, which I refer to as cars, find their way along the streets in an image. You can pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling the colors in the image. You can also control one of the squares with your arrow keys. There are a few different images to try out. Here are the shortcut keys: 
 <ul>
-<li>left mouse button to pan<BR>'+
+<li>left mouse button to pan</li>
 <li>mouse wheel to zoom in and out, centered on the cursor</li>
 <li>middle mouse click to toggle fullscreen</li>
 <li>double click to reset to default view (after panning and zooming)</li>
