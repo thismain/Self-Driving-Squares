@@ -423,14 +423,20 @@ steerRight[i]=false; steerLeft[i]=false;
 
 
 if(steerRight[i]){rightSteerAng[i]=steerAngInc; leftSteerAng[i]=0;
+
+if(i!=ci){
 rightSpin[i]++;
 leftSpin[i]=0;
 if(rightSpin[i]>50){collisionThrust[i]=.001;rightSpin[i]=0;steerRight[i]=false;}
+}
 
 }else if(steerLeft[i]){leftSteerAng[i]=-steerAngInc; rightSteerAng[i]=0;
+
+if(i!=ci){
 leftSpin[i]++;
 rightSpin[i]=0;
 if(leftSpin[i]>50){collisionThrust[i]=.001;leftSpin[i]=0;steerLeft[i]=false;}
+}
 
 }else{
 rightSpin[i]=0;leftSpin[i]=0;
