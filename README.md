@@ -11,14 +11,14 @@ Tiny squares, which I refer to as cars, find their way along the streets in an i
 <li>middle mouse click to toggle fullscreen</li>
 <li>double click to reset to default view (after panning and zooming)</li>
 <li>arrow keys to steer controllable square (fast black one)</li>
-<li>**v** key to add 50 cars</li>
-<li>**c** key to remove 50 cars</li>
-<li>**i** key to load a new street map</li>
-<li>**p** key to pause/resume</li>
-<li>**f** key to show fps</li>
-<li>**n** key to increase sim rate</li>
-<li>**b** key to decrease sim rate</li>
-<li>**q** key to hide the question mark</li>
+  <li><strong>v</strong> key to add 50 cars</li>
+<li><strong>c</strong> key to remove 50 cars</li>
+<li><strong>i</strong> key to load a new street map</li>
+<li><strong>p</strong> key to pause/resume</li>
+<li><strong>f</strong> key to show fps</li>
+<li><strong>n</strong> key to increase sim rate</li>
+<li><strong>b</strong> key to decrease sim rate</li>
+<li><strong>q</strong> key to hide the question mark</li>
 </ul>
   
 I am using the Matter.js  2d physics library for animation and rendering of the squares:  
