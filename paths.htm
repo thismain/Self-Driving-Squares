@@ -60,9 +60,9 @@ function subber(a,b){return {x:a.x-=b.x, y: a.y-=b.y};}
 
 var showHelp=false;
 var showQuestion=true;
-var imageFiles=['seamlessMapF.png','seamlessMap3.png','seamlessMap7.png','googleMap3a.png','googleMap18b.png','googleMap115a.png'];
-var ii=imageFiles.length-1;
-var roadR=[255,255,255,255,255,255];
+var imageFiles=['seamlessMapF.png','seamlessMap3.png','seamlessMap7.png','googleMap3a.png','googleMap18b.png','googleMap115a.png','googleMap131.png','googleMap151.png'];
+var ii=imageFiles.length-3;
+var roadR=[255,255,255,255,255,255,255,255];
 var zoomer=false;
 var paused=false;
 
@@ -542,8 +542,6 @@ da('tester', '<b>Help: <span style="color:#00ff00">h</span> key</b><BR>'+
 '&bull; <span style="color:#00ff00">i</span> key to load a new street map<BR>'+
 '&bull; <span style="color:#00ff00">p</span> key to pause/resume<BR>'+
 '&bull; <span style="color:#00ff00">f</span> key to show fps<BR>'+
-'&bull; <span style="color:#00ff00">n</span> key to increase sim rate<BR>'+
-'&bull; <span style="color:#00ff00">b</span> key to decrease sim rate<BR>'+
 '&bull; <span style="color:#00ff00">q</span> key to hide the question mark<BR>'+
 '&bull; <a target="_blank" href="https://github.com/thismain/self_driving_squares_using_matter.js">files on github</a>'
 );
