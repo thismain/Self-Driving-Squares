@@ -22,6 +22,9 @@ Tiny squares, which I refer to as cars, find their way along the streets in an i
 <li><strong>q</strong> key to hide the question mark</li>
 </ul>
   
+I am using mrdoob's stats.js: for fps:  
+https://github.com/mrdoob/stats.js/  
+  
 I am using the Matter.js  2d physics library for animation and rendering of the squares:  
 https://brm.io/matter-js/  
 https://github.com/liabru/matter-js  
