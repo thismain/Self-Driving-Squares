@@ -64,10 +64,11 @@ var showHelp=false;
 var showFps=false;
 var showQuestion=true;
 var imageFiles=['seamlessMapF.png','seamlessMap3.png','seamlessMap7.png','googleMap3a.png','googleMap18b.png','googleMap115a.png','googleMap131.png','googleMap151.png'];
-var ii=imageFiles.length-1;
+var ii=imageFiles.length-4;
 var roadR=[255,255,255,255,255,255,255,255];
 var zoomer=false;
 var paused=false;
+var flasher=false;
 
 var numCars=200;
 var carSize=6;
@@ -169,6 +170,9 @@ var steerAng=[];
 var leftSteerAng=[];
 var rightSteerAng=[];
 var steerAngMax=[];
+var rightSpin=[];
+var leftSpin=[];
+var spinThrust=[];
 
 var thrustInc=.009;
 var steerAngInc=.03;//.0013;
@@ -179,7 +183,7 @@ for(let i=0;i<numCars;i++){
 goForward[i]=true;
 goBackward[i]=false;
 reverseDir[i]=1;
-maxAccel[i]=1.8; if(i==ci){maxAccel[i]=1;}
+maxAccel[i]=1.8; 
 carVel[i]=maxAccel[i];
 
 steerLeft[i]=false;
@@ -188,6 +192,10 @@ steerAng[i]=0;
 leftSteerAng[i]=0;
 rightSteerAng[i]=0;
 steerAngMax[i]=.2; //.025;
+
+rightSpin[i]=0;
+leftSpin[i]=0;
+spinThrust[i]=0;
 }//end set car array vars
 }//end setCarDefaults
 
@@ -207,7 +215,8 @@ fillStyle: randHexColor()
 }
 
 }//end numCars loop
-
+car[ci].fillStyle='#000000';
+car[ci].altFill='#ff0000';
 }//end make cars
 
 
@@ -298,9 +307,23 @@ steerRight[i]=false; steerLeft[i]=false;
 
 
 if(steerRight[i]){rightSteerAng[i]=steerAngInc; leftSteerAng[i]=0;
+
+if(i!=ci){
+rightSpin[i]++;
+leftSpin[i]=0;
+if(rightSpin[i]>20){spinThrust[i]=.2;rightSpin[i]=0;steerRight[i]=false;}
+}
+
 }else if(steerLeft[i]){leftSteerAng[i]=-steerAngInc; rightSteerAng[i]=0;
+
+if(i!=ci){
+leftSpin[i]++;
+rightSpin[i]=0;
+if(leftSpin[i]>20){spinThrust[i]=.2;leftSpin[i]=0;steerLeft[i]=false;}
+}
+
 }else{
-leftSteerAng[i]=0; rightSteerAng[i]=0;
+leftSteerAng[i]=0; rightSteerAng[i]=0; spinThrust[i]=0;
 }
 
 if(Math.abs(steerAng[i])<steerAngMax[i]){
@@ -313,11 +336,11 @@ if(Math.abs(carVel[i])<maxAccel[i]){
 
 
 if(goForward[i]){
-carVel[i]+=thrustInc; 
+carVel[i]+=thrustInc+spinThrust[i]; 
 reverseDir[i]=1;
 
 }else if(goBackward[i]){
-carVel[i]-=thrustInc;
+carVel[i]-=thrustInc+spinThrust[i];
 reverseDir[i]=-1;
 }
 
@@ -378,6 +401,14 @@ ctx.strokeStyle=car[i].strokeStyle;
 ctx.lineWidth=car[i].lineWidth*zoomRatioW;
 ctx.fillStyle=car[i].fillStyle;
 
+if(i==ci){
+flasher=!flasher;
+if(flasher){
+ctx.fillStyle=car[i].fillStyle;
+}else{
+ctx.fillStyle=car[i].altFill;
+}}//end if i==ci
+
 carSizeZoom=carSize*zoomRatioW;
 ctx.fillRect(-carSizeZoom/2,-carSizeZoom/2, carSizeZoom, carSizeZoom); 
 ctx.strokeRect(-carSizeZoom/2,-carSizeZoom/2, carSizeZoom, carSizeZoom);
@@ -396,7 +427,7 @@ da('tester', '<b>Help: <span style="color:#00ff00">h</span> key</b><BR>'+
 '&bull; mouse wheel to zoom in and out, centered on the cursor<BR>'+
 '&bull; middle mouse click to toggle fullscreen<BR>'+
 '&bull; double click to reset to default view (after panning and zooming)<BR>'+
-'&bull; arrow keys to steer controllable square (the one which ignores roads)<BR>'+
+'&bull; arrow keys to steer controllable square (the flashing one)<BR>'+
 '&bull; <span style="color:#00ff00">v</span> key to add 50 cars<BR>'+
 '&bull; <span style="color:#00ff00">c</span> key to remove 50 cars<BR>'+
 '&bull; <span style="color:#00ff00">i</span> key to load a new street map<BR>'+
@@ -559,10 +590,14 @@ rfs.call(d);
 }//end exit fullscreen
 
 function toggleFullScreen(){
-if(isFullScreen()){exitFullScreen();
-}else{requestFullScreen();
-setTimeout("resetDefaultView();",100);
+if(isFullScreen()){
+exitFullScreen();
+setTimeout("resetDefaultView();",300);
+}else{
+requestFullScreen();
+setTimeout("resetDefaultView();",300);
 }
+
 }//end toggle full screen
 
 
