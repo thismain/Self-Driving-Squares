@@ -70,7 +70,7 @@ var zoomer=false;
 var paused=false;
 
 var numCars=200;
-var carSize=4;
+var carSize=6;
 var carSizeZoom=carSize;
 var ctxScale=1;
 var ww=window.innerWidth;
@@ -375,7 +375,7 @@ ctx.translate(rendPosX,rendPosY);
 ctx.rotate(car[i].angle);
 
 ctx.strokeStyle=car[i].strokeStyle;
-ctx.lineWidth=car[i].lineWidth;
+ctx.lineWidth=car[i].lineWidth*zoomRatioW;
 ctx.fillStyle=car[i].fillStyle;
 
 carSizeZoom=carSize*zoomRatioW;
