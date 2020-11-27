@@ -104,9 +104,9 @@ var fullscreenMode=false;
 
 var bgCtx=el('canvasBG').getContext('2d');
 var bImg=new Image();
-
 bImg.src=imageFiles[ii]; 
-bImg.onload=function(){setBimg();}
+da('tester', 'Loading Street Map Image...');
+bImg.onload=function(){setBimg();setZimg();el('tester').style.display='none';}
 
 function setBimg(){
 el('canvasBG').width=ww;
@@ -120,13 +120,6 @@ bgCtx.drawImage(bImg, 0, 0, ww, hh);
 }//end setBimg
 
 var zCtx=el('canvasZoom').getContext('2d');
-var zImg=new Image();
-zImg.src=imageFiles[ii]; 
-da('tester', 'Loading Street Map Image...');
-zImg.onload=function(){
-el('tester').style.display='none';
-setZimg();
-}//end onload function for zImg
 
 function setZimg(){
 el('canvasZoom').width=ww;
@@ -137,7 +130,7 @@ el('canvasZoom').style.left=0+'px';
 el('canvasZoom').style.top=0+'px';
 el('canvasZoom').style.backgroundColor='#ffffff';
 zCtx.clearRect(0, 0, ww, hh);
-zCtx.drawImage(zImg, zoomLeft+lefter, zoomTop+topper, zoomW, zoomH);
+zCtx.drawImage(bImg, zoomLeft+lefter, zoomTop+topper, zoomW, zoomH);
 }//end setZimg
 
 
@@ -472,7 +465,6 @@ ii++;if(ii>=imageFiles.length){ii=0;}
 }
 da('tester', 'Loading Street Map Image...');
 bImg.src=imageFiles[ii];
-zImg.src=imageFiles[ii];
 resetDefaultView();
 break;
 case 'k':
@@ -744,6 +736,7 @@ zoomTop*=zr;
 lefter*=zr;
 topper*=zr;
 
+//canvasZoom
 setZimg();
 
 setBorderDiv();
