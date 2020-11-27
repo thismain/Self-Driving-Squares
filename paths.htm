@@ -64,9 +64,9 @@ function subber(a,b){return {x:a.x-=b.x, y: a.y-=b.y};}
 
 var showHelp=false;
 var showQuestion=true;
-var imageFiles=['seamlessMapF.png','seamlessMap3.png','seamlessMap7.png','googleMap3a.png','googleMap18b.png','googleMap115a.png','googleMap131.png','googleMap151.png'];
+var imageFiles=['googleMap151.png','seamlessMapF.png','seamlessMap3.png','seamlessMap7.png','googleMap3a.png','googleMap18b.png','googleMap115a.png'];
 var ii=imageFiles.length-1;
-var roadR=[255,255,255,255,255,255,255,255];
+var roadR=[255,255,255,255,255,255,255];
 var zoomer=false;
 var paused=false;
 
@@ -248,6 +248,9 @@ var collisionThrust=[];
 var leftSpin=[];
 var rightSpin=[];
 
+var offRoadCounter=[];
+var offRoadThrust=[];
+
 function setCarDefaults(){
 for(let i=oldNumCars;i<numCars;i++){
 
@@ -269,6 +272,9 @@ almostColliding[i]=false;
 collisionThrust[i]=0;
 leftSpin[i]=false;
 rightSpin[i]=false;
+
+offRoadCounter[i]=true;
+offRoadThrust[i]=.00001;
 }//end set car array vars
 }//end setCarDefaults
 
@@ -351,6 +357,7 @@ stats.dom.style.visibility='hidden';
 
 //the ticker loop
 function ticker(time){ 
+if(!paused){
 stats.begin();
 if(!changingNumCars){
 
@@ -381,6 +388,9 @@ aheadY,
 
 //road ends ahead, so check right and left, if at edge just keep going
 if(cS.data[0]!=roadR[ii]&&aheadX>0&&aheadX<ww&&aheadY>0&&aheadY<hh){
+
+offRoadCounter[i]++;if(offRoadCounter[i]>60){offRoadThrust[i]=.00001;}
+
 car[i].frictionAir=frictionAirDefault*(2.0+Math.abs(carVel[i])*2000);
 carVel[i]*=.97;
 
@@ -421,6 +431,7 @@ goBackward[i]=true;
 
 //if road continues straight ahead, do not turn
 }else{
+offRoadCounter[i]=0;offRoadThrust[i]=0;
 car[i].frictionAir=frictionAirDefault;
 steerRight[i]=false; steerLeft[i]=false;
 }
@@ -465,11 +476,11 @@ if(Math.abs(carVel[i])<maxAccel[i]||almostColliding[i]){
 
 
 if(goForward[i]){
-carVel[i]+=thrustInc+collisionThrust[i]; 
+carVel[i]+=thrustInc+collisionThrust[i]+offRoadThrust[i]; 
 reverseDir[i]=1;
 
 }else if(goBackward[i]){
-carVel[i]-=thrustInc+collisionThrust[i];
+carVel[i]-=thrustInc+collisionThrust[i]+offRoadThrust[i];
 reverseDir[i]=-1;
 }
 
@@ -499,9 +510,6 @@ steerAng[i]*=.4;}
 }//end all cars loop
 
 stats.end();
-if(!paused){
-window.requestAnimationFrame(ticker);
-}
 
 simRate=1000/varSimRate;
 Matter.Engine.update(engine, simRate);
@@ -509,6 +517,9 @@ Matter.Engine.update(engine, simRate);
 detectBrowserZoom();
 //da('tester', hh+' '+render.bounds.max.y);
 }//end !changingNumCars
+
+}//end if !paused
+window.requestAnimationFrame(ticker);
 } //end ticker function
 
 
@@ -590,6 +601,7 @@ da('tester', 'Loading Street Map Image...');
 bImg.src=imageFiles[ii];
 zImg.src=imageFiles[ii];
 resetDefaultView();
+initCars();
 break;
 case 'k':
 break;
@@ -622,8 +634,6 @@ break;
 case 't':
 break;
 case 'g':
-//extra tickers for faster animation
-ticker();
 break;
 
 case 'q':
@@ -664,7 +674,7 @@ break;
 case 'y':
 break;
 case 'p': 
-paused=!paused;if(!paused){ticker();document.title='running - Self Driving Squares';}else{document.title='paused - Self Driving Squares';}
+paused=!paused;if(!paused){document.title='running - Self Driving Squares';}else{document.title='paused - Self Driving Squares';}
 break;
 }
 }//end keydowner
@@ -944,7 +954,7 @@ el('canvid').focus();
 
 //so does not keep running when you are not on the page
 window.onblur=function(){paused=true;document.title='paused - Self Driving Squares';}
-window.onfocus=function(){if(paused){paused=false;ticker();document.title='running - Self Driving Squares';}}
+window.onfocus=function(){if(paused){paused=false;document.title='running - Self Driving Squares';}}
 
 ticker();
 </script>
