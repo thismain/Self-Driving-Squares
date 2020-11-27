@@ -156,8 +156,6 @@ setBorderDiv();
 var car=[];
 var ci=0;
 
-var frictionAirDefault=.99;
-
 var goForward=[];
 var goBackward=[];
 var reverseDir=[];
@@ -173,6 +171,9 @@ var steerAngMax=[];
 var rightSpin=[];
 var leftSpin=[];
 var spinThrust=[];
+
+var offRoadCounter=[];
+var offRoadThrust=[];
 
 var thrustInc=.009;
 var steerAngInc=.03;//.0013;
@@ -196,6 +197,9 @@ steerAngMax[i]=.2; //.025;
 rightSpin[i]=0;
 leftSpin[i]=0;
 spinThrust[i]=0;
+
+offRoadCounter[i]=true;
+offRoadThrust[i]=.2;
 }//end set car array vars
 }//end setCarDefaults
 
@@ -208,7 +212,6 @@ car[k]=
 position:{x:randRange(0,ww),y:randRange(0,hh)},
 angle: randRange(-2*Math.PI,2*Math.PI),
 id:k,
-frictionAir:frictionAirDefault,
 strokeStyle:'#000000',
 lineWidth:.5, 
 fillStyle: randHexColor()
@@ -254,8 +257,10 @@ aheadY,
 
 //road ends ahead, so check right and left, if at edge just keep going
 if(cS.data[0]!=roadR[ii]&&aheadX>0&&aheadX<ww&&aheadY>0&&aheadY<hh){
-//car[i].frictionAir=frictionAirDefault;
-carVel[i]*=.95;//car[i].frictionAir;
+
+offRoadCounter[i]++;if(offRoadCounter[i]>60){offRoadThrust[i]=.2;}
+
+carVel[i]*=.95;
 
 // check leftward ahead, getImatgeData(x,y,width,height)
 {
@@ -267,7 +272,6 @@ car[i].position.y+carSize*.5+Math.sin(car[i].angle-0.5)*4,
 //if road detected leftward
 if(cR.data[0]==roadR[ii]){ 
 carVel[i]*=.95
-//car[i].frictionAir=frictionAirDefault*.5;
 steerLeft[i]=true; steerRight[i]=false;
 goBackward[i]=false
 }else{
@@ -281,7 +285,6 @@ car[i].position.y+carSize*.5+Math.sin(car[i].angle+0.5)*4,
 
 if(cL.data[0]==roadR[ii]){
 carVel[i]*=.95
-//car[i].frictionAir=frictionAirDefault*.5;
 steerRight[i]=true; steerLeft[i]=false;
 goBackward[i]=false;
 }else{
@@ -297,7 +300,7 @@ goBackward[i]=true;
 
 //if road continues straight ahead, do not turn
 }else{
-car[i].frictionAir=frictionAirDefault;
+offRoadCounter[i]=0;offRoadThrust[i]=0;
 steerRight[i]=false; steerLeft[i]=false;
 }
 }//end check rightward ahead
@@ -336,11 +339,11 @@ if(Math.abs(carVel[i])<maxAccel[i]){
 
 
 if(goForward[i]){
-carVel[i]+=thrustInc+spinThrust[i]; 
+carVel[i]+=thrustInc+spinThrust[i]+offRoadThrust[i]; 
 reverseDir[i]=1;
 
 }else if(goBackward[i]){
-carVel[i]-=thrustInc+spinThrust[i];
+carVel[i]-=thrustInc+spinThrust[i]+offRoadThrust[i];
 reverseDir[i]=-1;
 }
 
