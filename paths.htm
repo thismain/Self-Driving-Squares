@@ -7,8 +7,11 @@
 November 15, 2020
 Live demo: http://drive.x10host.com/city/paths.htm  
   
-Tiny squares, which I refer to as cars, find their way along the streets in an image. You can also pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling the colors in the image. You can also control one of the squares with your arrow keys.  
+Tiny squares, which I refer to as cars, find their way along the streets in an image. You can also pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling the colors in the image. You can also control one of the squares with your arrow keys. 
   
+I am using mrdoob's stats.js: for fps:  
+https://github.com/mrdoob/stats.js/  
+   
 I am using the Matter.js  2d physics library for animation and rendering of the squares:  
 https://brm.io/matter-js/  
 https://github.com/liabru/matter-js  
@@ -29,6 +32,7 @@ The images required some manual processing, to change the width/height ratio, an
 -->
 <script src="matter.js"></script>
 <script src="matter-wrap.js"></script>
+<script src="stats.js"></script>
 </head>
 <body id="bodid" style="overflow:hidden;background-color:#000000;zoom:1;">
 
@@ -67,7 +71,7 @@ var zoomer=false;
 var paused=false;
 
 var oldNumCars=0;
-var numCars=200;
+var numCars=100;
 var changingNumCars=false;
 
 var ww=window.innerWidth;
@@ -339,12 +343,18 @@ function rgbToHex(r, g, b){
 return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
+var stats=new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
+stats.dom.style.visibility='hidden';
+
 
 //the ticker loop
-function ticker(){ 
+function ticker(time){ 
+stats.begin();
 if(!changingNumCars){
 
-if(showingFPS){getFPS();}
+//if(showingFPS){getFPS();}
 
 
 for(let i=0;i<numCars;i++){
@@ -488,7 +498,7 @@ steerAng[i]*=.4;}
 
 }//end all cars loop
 
-
+stats.end();
 if(!paused){
 window.requestAnimationFrame(ticker);
 }
@@ -585,7 +595,9 @@ case 'k':
 break;
 case 'f':
 showingFPS=!showingFPS;
-if(showingFPS){showHelp=false;}else{el('tester').style.display='none';}
+if(showingFPS){stats.dom.style.visibility='visible';}else{stats.dom.style.visibility='hidden';}
+//showingFPS=!showingFPS;
+//if(showingFPS){showHelp=false;}else{el('tester').style.display='none';}
 break;
 case 'h': 
 showHelp=!showHelp;
