@@ -69,6 +69,7 @@ var roadR=[255,255,255,255,255,255,255,255];
 var zoomer=false;
 var paused=false;
 var flasher=false;
+var flasherTick=0;
 
 var numCars=200;
 var carSize=6;
@@ -405,7 +406,8 @@ ctx.lineWidth=car[i].lineWidth*zoomRatioW;
 ctx.fillStyle=car[i].fillStyle;
 
 if(i==ci){
-flasher=!flasher;
+flasherTick--;
+if(flasherTick<0){flasher=!flasher;flasherTick=5;}
 if(flasher){
 ctx.fillStyle=car[i].fillStyle;
 }else{
