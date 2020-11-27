@@ -72,6 +72,7 @@ var flasher=false;
 var flasherTick=0;
 
 var numCars=200;
+var changingNumCars=false;
 var carSize=6;
 var carSizeZoom=carSize;
 var ctxScale=1;
@@ -233,6 +234,7 @@ stats.dom.style.visibility='hidden';
 //the ticker loop
 function ticker(time){ 
 if(!paused){
+if(!changingNumCars){
 stats.begin();
 ctx.clearRect(0,0,ww,hh);	
 
@@ -374,6 +376,7 @@ renderCars(i);
 
 detectBrowserZoom();
 stats.end();
+}//end if !changingNumCars
 }//end if !paused
 window.requestAnimationFrame(ticker);
  
@@ -483,14 +486,18 @@ if(showHelp){ displayHelp();
 
 break;
 case 'v': 
+changingNumCars=true;
 numCars+=50; el('numcars').value=numCars;
 initCars();
+changingNumCars=false;
 break;
 case 'c': 
+changingNumCars=true;
 if(numCars>50){
 numCars-=50; el('numcars').value=numCars;
 initCars();
 }
+changingNumCars=false;
 break;
 case 't':
 break;
