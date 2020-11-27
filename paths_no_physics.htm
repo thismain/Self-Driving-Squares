@@ -1,0 +1,740 @@
+<html>
+<head>
+<title>Self-Driving-Squares - No Physics</title>
+<!--
+# Self-Driving-Squares
+
+November 15, 2020
+Live demo: http://drive.x10host.com/city/paths.htm  
+  
+Tiny squares, which I refer to as cars, find their way along the streets in an image. You can also pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling the colors in the image. You can also control one of the squares with your arrow keys.  
+  
+I am using the Matter.js  2d physics library for animation and rendering of the squares:  
+https://brm.io/matter-js/  
+https://github.com/liabru/matter-js  
+  
+I am also using images from:  
+https://www.dreamstime.com/stock-images-city-seamless-vector-wallpaper-image5056574  
+https://thumbs.dreamstime.com/b/city-seamless-vector-wallpaper-5056574.jpg  
+and  
+https://depositphotos.com/68246427/stock-illustration-minimal-city-map-for-gps.html  
+https://st2.depositphotos.com/4559651/6824/v/950/depositphotos_68246427-stock-illustration-minimal-city-map-for-gps.jpg  
+and  
+https://depositphotos.com/9519225/stock-illustration-seamless-background-of-abstract-city.html  
+https://static8.depositphotos.com/1303735/951/v/950/depositphotos_9519225-stock-illustration-seamless-background-of-abstract-city.jpg  
+and  
+https://www.google.com/maps/  
+  
+The images required some manual processing, to change the width/height ratio, and to remove the non-white pixels from the streets, for doing which I used Gimp.  
+-->
+<!--
+<script src="matter.js"></script>
+<script src="matter-wrap.js"></script>
+-->
+<script src="stats.js"></script>
+</head>
+<body id="bodid" style="overflow:hidden;background-color:#ffffff;zoom:1;">
+
+<canvas id="canvid" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:1000;" ></canvas>
+<canvas id="canvasBG" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:900;visibility:hidden;display:none;"></canvas>
+<canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;"></canvas>
+<div id="borderDiv" style="visibility:visible;z-index:9000;position:absolute;width:1px;height:1px;left:-10px;top:-10px;" ></div>
+
+<div id="tester" style="display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;" onclick="showHelp=false;this.style.display='none';"></div>
+
+
+<div id="helpDiv" style="z-index:10000;position:absolute;top:4;left:4px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:16px;padding-top:0px;padding-bottom:0px;padding-right:6px;padding-left:6px;border:2px solid #ffffff;opacity:.3;cursor:pointer;" onmousedown="this.style.backgroundColor='#00ff00';showHelp=!showHelp;if(showHelp){displayHelp();}else{el('tester').style.display='none';}" onmouseup="this.style.backgroundColor='#000000';" onmouseover="this.style.backgroundColor='#00800f';" onmouseout="this.style.backgroundColor='#000000';"><b>?</b></div>
+
+
+</body>
+</html>
+
+<script>
+
+function el(a){return document.getElementById(a);}
+function da(a,b){if(el(a)){el(a).innerHTML=b;el(a).style.display='block';}}
+function fixAngleRad(a){if(a>Math.PI){a-=Math.PI*2;}else if(a<-Math.PI){a+=Math.PI*2;}return a;}
+function randRange(min, max){return Math.floor(Math.random() * (max - min + 1)) + min;}
+function randHexColor(){return '#'+Math.floor(Math.random()*16777215).toString(16);}
+function subber(a,b){return {x:a.x-=b.x, y: a.y-=b.y};}
+function componentToHex(c){var hex=c.toString(16);return hex.length==1?"0"+hex:hex;}
+function rgbToHex(r,g,b){return "#"+componentToHex(r)+componentToHex(g)+componentToHex(b);}
+
+var ctx=el('canvid').getContext('2d');
+var showHelp=false;
+var showFps=false;
+var showQuestion=true;
+var imageFiles=['seamlessMapF.png','seamlessMap3.png','seamlessMap7.png','googleMap3a.png','googleMap18b.png','googleMap115a.png','googleMap131.png','googleMap151.png'];
+var ii=imageFiles.length-1;
+var roadR=[255,255,255,255,255,255,255,255];
+var zoomer=false;
+var paused=false;
+
+var numCars=200;
+var carSize=4;
+var carSizeZoom=carSize;
+var ctxScale=1;
+var ww=window.innerWidth;
+var oldww=ww;
+var w_zoomRatio=ww/oldww;
+var hh=window.innerHeight;
+var oldhh=hh;
+var h_zoomRatio=hh/oldhh;
+
+
+
+el('tester').style.maxWidth=ww*.8+'px';
+
+el('canvid').width=ww;
+el('canvid').style.width=ww+'px';
+
+el('canvid').height=hh;
+el('canvid').style.height=hh+'px';
+
+el('canvid').style.left='0px';
+el('canvid').style.top='0px';
+
+var fullscreenMode=false;
+
+
+//canvid is for rendering the cars themselves
+//canvasBG is for getting the pixel color values from the image, it is not visible
+//canvasZoom is visible, it changes size with zooming
+
+var bgCtx=el('canvasBG').getContext('2d');
+var bImg=new Image();
+
+bImg.src=imageFiles[ii]; 
+bImg.onload=function(){setBimg();}
+
+function setBimg(){
+el('canvasBG').width=ww;
+el('canvasBG').style.width=ww+'px';
+el('canvasBG').height=hh;
+el('canvasBG').style.height=hh+'px'
+el('canvasBG').style.left='0px';
+el('canvasBG').style.top='0px';
+bgCtx.clearRect(0,0,ww,hh);
+bgCtx.drawImage(bImg, 0, 0, ww, hh);
+}//end setBimg
+
+var zCtx=el('canvasZoom').getContext('2d');
+var zImg=new Image();
+zImg.src=imageFiles[ii]; 
+da('tester', 'Loading Street Map Image...');
+zImg.onload=function(){
+el('tester').style.display='none';
+setZimg();
+}//end onload function for zImg
+
+function setZimg(){
+el('canvasZoom').width=ww;
+el('canvasZoom').style.width=ww+'px';
+el('canvasZoom').height=hh;
+el('canvasZoom').style.height=hh+'px'
+el('canvasZoom').style.left=0+'px';
+el('canvasZoom').style.top=0+'px';
+el('canvasZoom').style.backgroundColor='#ffffff';
+zCtx.clearRect(0, 0, ww, hh);
+zCtx.drawImage(zImg, zoomLeft+lefter, zoomTop+topper, zoomW, zoomH);
+}//end setZimg
+
+
+var borderW=100;
+function setBorderDiv(){
+borderZoom=borderW*zoomRatioW;
+el('borderDiv').style.width=zoomW+'px';
+el('borderDiv').style.height=zoomH+'px';
+el('borderDiv').style.left=zoomLeft+lefter-borderZoom+'px';
+el('borderDiv').style.top=zoomTop+topper-borderZoom+'px';
+el('borderDiv').style.border=borderZoom+'px solid #ffffff'; 
+el('borderDiv').style.boxShadow='inset 0px 0px 1px 1px #586474';
+}//end setBorderDiv
+
+setBorderDiv();
+
+var car=[];
+var ci=0;
+
+var frictionAirDefault=.99;
+
+var goForward=[];
+var goBackward=[];
+var reverseDir=[];
+var carVel=[];
+var maxAccel=[];
+
+var steerLeft=[];
+var steerRight=[];
+var steerAng=[]; 
+var leftSteerAng=[];
+var rightSteerAng=[];
+var steerAngMax=[];
+
+var thrustInc=.009;
+var steerAngInc=.03;//.0013;
+
+function setCarDefaults(){
+for(let i=0;i<numCars;i++){
+
+goForward[i]=true;
+goBackward[i]=false;
+reverseDir[i]=1;
+maxAccel[i]=1.8; if(i==ci){maxAccel[i]=1;}
+carVel[i]=maxAccel[i];
+
+steerLeft[i]=false;
+steerRight[i]=false;
+steerAng[i]=0; 
+leftSteerAng[i]=0;
+rightSteerAng[i]=0;
+steerAngMax[i]=.2; //.025;
+}//end set car array vars
+}//end setCarDefaults
+
+
+function makeCars(){
+for(let k=0;k<numCars;k++){
+
+car[k]= 
+{
+position:{x:randRange(0,ww),y:randRange(0,hh)},
+angle: randRange(-2*Math.PI,2*Math.PI),
+id:k,
+frictionAir:frictionAirDefault,
+strokeStyle:'#000000',
+lineWidth:.5, 
+fillStyle: randHexColor()
+}
+
+}//end numCars loop
+
+}//end make cars
+
+
+function initCars(){
+setCarDefaults();
+makeCars();
+}//end initCars
+
+initCars();
+
+
+var stats=new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
+stats.dom.style.visibility='hidden';
+
+//the ticker loop
+function ticker(time){ 
+stats.begin();
+ctx.clearRect(0,0,ww,hh);	
+
+for(let i=0;i<numCars;i++){
+
+if(i!=ci){
+
+// check straight ahead
+{
+let aheadX=car[i].position.x+carSize*.5+Math.cos(car[i].angle)*10;
+let aheadY=car[i].position.y+carSize*.5+Math.sin(car[i].angle)*10;
+
+let cS=bgCtx.getImageData(
+aheadX,
+aheadY,
+1,1);
+
+//road ends ahead, so check right and left, if at edge just keep going
+if(cS.data[0]!=roadR[ii]&&aheadX>0&&aheadX<ww&&aheadY>0&&aheadY<hh){
+//car[i].frictionAir=frictionAirDefault;
+carVel[i]*=.95;//car[i].frictionAir;
+
+// check leftward ahead, getImatgeData(x,y,width,height)
+{
+let cR=bgCtx.getImageData(
+car[i].position.x+carSize*.5+Math.cos(car[i].angle-0.5)*4,	 
+car[i].position.y+carSize*.5+Math.sin(car[i].angle-0.5)*4,
+1,1);
+
+//if road detected leftward
+if(cR.data[0]==roadR[ii]){ 
+carVel[i]*=.95
+//car[i].frictionAir=frictionAirDefault*.5;
+steerLeft[i]=true; steerRight[i]=false;
+goBackward[i]=false
+}else{
+
+// check rightward ahead
+{
+let cL=bgCtx.getImageData(
+car[i].position.x+carSize*.5+Math.cos(car[i].angle+0.5)*4,
+car[i].position.y+carSize*.5+Math.sin(car[i].angle+0.5)*4,
+1,1);
+
+if(cL.data[0]==roadR[ii]){
+carVel[i]*=.95
+//car[i].frictionAir=frictionAirDefault*.5;
+steerRight[i]=true; steerLeft[i]=false;
+goBackward[i]=false;
+}else{
+//steerLeft[i]=false; steerRight[i]=false;
+goBackward[i]=true;
+}
+}//end check rightward ahead
+
+
+}//end road not detected leftward
+}//end check leftward ahead
+
+
+//if road continues straight ahead, do not turn
+}else{
+car[i].frictionAir=frictionAirDefault;
+steerRight[i]=false; steerLeft[i]=false;
+}
+}//end check rightward ahead
+
+}//end i!=ci
+
+
+
+if(steerRight[i]){rightSteerAng[i]=steerAngInc; leftSteerAng[i]=0;
+}else if(steerLeft[i]){leftSteerAng[i]=-steerAngInc; rightSteerAng[i]=0;
+}else{
+leftSteerAng[i]=0; rightSteerAng[i]=0;
+}
+
+if(Math.abs(steerAng[i])<steerAngMax[i]){
+steerAng[i]+=leftSteerAng[i] + rightSteerAng[i];
+}
+
+
+//speed limit
+if(Math.abs(carVel[i])<maxAccel[i]){   
+
+
+if(goForward[i]){
+carVel[i]+=thrustInc; 
+reverseDir[i]=1;
+
+}else if(goBackward[i]){
+carVel[i]-=thrustInc;
+reverseDir[i]=-1;
+}
+
+goForward[i]=true;
+
+}else{  //when over speed limit
+//carVel[i]*=.99;
+goForward[i]=false;
+}
+
+if(!goForward[i]&&!goBackward[i]){
+//carVel[i]*=.99;
+}
+
+if(!steerLeft[i]&&!steerRight[i]){steerAng[i]*=.4;}
+
+car[i].angle+=steerAng[i]*reverseDir[i];
+
+
+car[i].position.x+=Math.cos(car[i].angle) * carVel[i];
+car[i].position.y+=Math.sin(car[i].angle) * carVel[i]; 
+
+
+if(car[i].position.x>ww+carSizeZoom){car[i].position.x=-carSizeZoom;
+}else if(car[i].position.x<-carSizeZoom){car[i].position.x=ww+carSizeZoom;}
+
+if(car[i].position.y>hh+carSizeZoom){car[i].position.y=-carSizeZoom;
+}else if(car[i].position.y<-carSizeZoom){car[i].position.y=hh+carSizeZoom;}
+
+renderCars(i);
+}//end all cars loop
+
+
+detectBrowserZoom();
+stats.end();
+if(!paused){
+window.requestAnimationFrame(ticker);
+} 
+
+} //end ticker function
+
+
+//render the positions of cars to the zoomed values, but leave actual positions of cars above background image alone, and leave background image alone, filling inner window, 0,0, ww, hh, so that the cars can get the correct pixel color values from the image
+function renderCars(i){
+
+zoomRatioW=zoomW/ww;
+zoomRatioH=zoomH/hh;
+
+let rendPosX=zoomLeft+lefter+(car[i].position.x+carSize*.5)*zoomRatioW;
+let rendPosY=zoomTop+topper+(car[i].position.y+carSize*.5)*zoomRatioH;
+
+ctx.save();
+
+ctx.translate(rendPosX,rendPosY);
+ctx.rotate(car[i].angle);
+
+ctx.strokeStyle=car[i].strokeStyle;
+ctx.lineWidth=car[i].lineWidth;
+ctx.fillStyle=car[i].fillStyle;
+
+carSizeZoom=carSize*zoomRatioW;
+ctx.fillRect(-carSizeZoom/2,-carSizeZoom/2, carSizeZoom, carSizeZoom); 
+ctx.strokeRect(-carSizeZoom/2,-carSizeZoom/2, carSizeZoom, carSizeZoom);
+ctx.restore();
+
+}//end renderCars
+
+
+
+document.body.addEventListener("keydown", keydowner);
+document.body.addEventListener("keyup", keyupper);
+
+function displayHelp(){
+da('tester', '<b>Help: <span style="color:#00ff00">h</span> key</b><BR>'+
+'&bull; left mouse button to pan<BR>'+
+'&bull; mouse wheel to zoom in and out, centered on the cursor<BR>'+
+'&bull; middle mouse click to toggle fullscreen<BR>'+
+'&bull; double click to reset to default view (after panning and zooming)<BR>'+
+'&bull; arrow keys to steer controllable square (the one which ignores roads)<BR>'+
+'&bull; <span style="color:#00ff00">v</span> key to add 50 cars<BR>'+
+'&bull; <span style="color:#00ff00">c</span> key to remove 50 cars<BR>'+
+'&bull; <span style="color:#00ff00">i</span> key to load a new street map<BR>'+
+'&bull; <span style="color:#00ff00">p</span> key to pause/resume<BR>'+
+'&bull; <span style="color:#00ff00">f</span> key to show fps, click fps to see ms, and memory usage<BR>'+
+'&bull; <span style="color:#00ff00">q</span> key to hide the question mark<BR>'+
+'&bull; <a target="_blank" href="https://github.com/thismain/self_driving_squares_using_matter.js">files on github</a>'
+);
+}//end displayHelp
+
+if(showHelp){displayHelp();}
+
+var altKey=false;
+function keydowner(event){ 
+if(event.key=='z'){altKey=true;} 
+switch(event.key ){
+case '0':
+break;
+case '1':
+break;
+case '2':
+break;
+case '3':
+break;
+case 'b': 
+varSimRate++;
+break;
+case 'n': 
+
+break;
+case 'm':
+resetDefaultView();
+break;
+case 'i':
+if(!altKey){ii--; if(ii<0){ii=imageFiles.length-1;}}else{
+ii++;if(ii>=imageFiles.length){ii=0;}
+}
+da('tester', 'Loading Street Map Image...');
+bImg.src=imageFiles[ii];
+zImg.src=imageFiles[ii];
+resetDefaultView();
+break;
+case 'k':
+break;
+case 'f':
+showFps=!showFps;
+if(showFps){stats.dom.style.visibility='visible';}else{stats.dom.style.visibility='hidden';}
+break;
+case 'h': 
+showHelp=!showHelp;
+if(showHelp){ displayHelp();
+}else{el('tester').style.display='none';}
+
+break;
+case 'v': 
+numCars+=50;
+initCars();
+break;
+case 'c': 
+if(numCars>50){
+numCars-=50;
+initCars();
+}
+break;
+case 't':
+break;
+case 'g':
+//extra tickers for faster animation
+ticker();
+break;
+
+case 'q':
+showQuestion=!showQuestion;
+if(!showQuestion){el('helpDiv').style.display='none';
+}else{el('helpDiv').style.display='block';}
+break;
+
+
+case ' ':
+break;
+case 'w': case 'ArrowUp':
+goForward[ci]=true; 
+goBackward[ci]=false; 
+if(carVel[ci]<0){carVel[ci]=0;}
+break;
+
+case 's': case 'ArrowDown':
+goForward[ci]=false;
+goBackward[ci]=true; 
+if(carVel[ci]>0){carVel[ci]=0;}
+
+break;
+
+case 'a': case 'ArrowLeft': 
+steerLeft[ci]=true;  leftSteerAng[ci]=-steerAngInc; rightSteerAng[ci]=0;
+break;
+
+case 'd': case 'ArrowRight':
+steerRight[ci]=true; rightSteerAng[ci]=steerAngInc; leftSteerAng[ci]=0;
+break;
+case 'l':
+break;
+case 'o':
+break;
+case 'u':
+break;
+case 'y':
+break;
+case 'p': 
+paused=!paused;if(!paused){ticker();document.title='running - Self Driving Squares';}else{document.title='paused - Self Driving Squares';}
+break;
+}
+}//end keydowner
+
+function keyupper(event){
+if(event.key=='z'){altKey=false;}
+switch(event.key ){
+
+case 'w': case 'ArrowUp':
+goForward[ci]=false; 
+break;
+
+case 's': case 'ArrowDown':
+goBackward[ci]=false; 
+break;
+
+case 'a': case 'ArrowLeft':
+steerLeft[ci]=false; leftSteerAng[ci]=0;
+break;
+
+case 'd': case 'ArrowRight':
+steerRight[ci]=false; rightSteerAng[ci]=0;
+break;
+}
+}//end keyupper
+
+
+function isFullScreen(){
+return (document.fullScreenElement && document.fullScreenElement !== null)
+|| document.mozFullScreen
+|| document.webkitIsFullScreen;
+}//end is full screen
+
+function requestFullScreen(){
+var el=document.documentElement;
+var rfs=el.requestFullscreen
+|| el.webkitRequestFullScreen
+|| el.mozRequestFullScreen
+|| el.msRequestFullscreen;
+rfs.call(el);
+}//end request full screen 
+
+function exitFullScreen(){
+var d=document;
+var rfs=d.exitFullscreen
+|| d.webkitExitFullscreen
+|| d.mozCancelFullScreen
+|| d.msExitFullscreen ;
+rfs.call(d);
+}//end exit fullscreen
+
+function toggleFullScreen(){
+if(isFullScreen()){exitFullScreen();
+}else{requestFullScreen();
+setTimeout("resetDefaultView();",100);
+}
+}//end toggle full screen
+
+
+//for pan zooming
+var delta=0;
+var zoom=1;
+var zoomW=ww, zoomH=hh, oldZoomW=zoomW, oldZoomH=zoomH;
+var zoomLeft=0, zoomTop=0;
+var lefter=0, topper=0;
+var oldx=0, oldy=0;
+var dragging=false;
+var zoomRatioW=zoomW/ww;
+var zoomRatioH=zoomH/hh;
+var borderWidth=8;
+var borderZoom=borderWidth*zoomRatioW;
+
+//for panning and zooming centered on the cursor
+function mouseWheeler(event){
+delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+if(delta>0||delta<0){
+if(delta>0){zoom=1.2;}else{zoom=.8;}
+
+let mousex=event.clientX;
+let mousey=event.clientY;
+
+let L=zoomLeft+lefter;
+let T=zoomTop+topper;
+let mulx=(mousex-L)/zoomW;
+let muly=(mousey-T)/zoomH;
+zoomW*=zoom;
+zoomH*=zoom;
+zoomLeft+=(oldZoomW-zoomW)*mulx;
+zoomTop+=(oldZoomH-zoomH)*muly;
+
+//canvasZoom
+setZimg();
+
+setBorderDiv();
+
+delta=0;
+oldZoomW=zoomW;
+oldZoomH=zoomH;
+}//if delta !==0
+
+}//end mouseWheeler
+
+document.body.ondblclick=function(){resetDefaultView();}
+document.body.onmousedown=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
+document.body.onmousewheel=function(){mouseWheeler(event);}
+document.body.onmouseup=function(){panMouseupper(event);}
+document.body.onmousemove=function(){panMousemover(event);}
+
+function panMousedowner(event){
+event.preventDefault();
+if(event.which!=3){dragging=true;}
+oldx=event.clientX; 
+oldy=event.clientY; 
+}//end mousedowner
+
+
+function panMouseupper(event){
+event.preventDefault();
+dragging=false;
+}//end mouseupper
+
+
+function panMousemover(event){ 
+event.preventDefault();
+
+if(dragging){ 
+lefter+=event.clientX-oldx;
+topper+=event.clientY-oldy;
+
+//canvasZoom
+setZimg();
+
+
+el('borderDiv').style.left=zoomLeft+lefter-borderZoom+'px';
+el('borderDiv').style.top=zoomTop+topper-borderZoom+'px';
+
+oldx=event.clientX;
+oldy=event.clientY;
+
+}}//end mousemover
+
+
+//reset to default view
+function resetDefaultView(){
+ww=window.innerWidth;
+hh=window.innerHeight;
+zoomLeft=0;
+zoomTop=0;
+lefter=0;
+topper=0;
+zoomW=ww;
+zoomH=hh;
+oldZoomW=zoomW;
+oldZoomH=zoomH;
+
+//canvasZoom
+setZimg();
+
+setBorderDiv();
+
+}//end resetDefaultView
+
+
+function detectBrowserZoom(){
+if(ww!=window.innerWidth || hh!=window.innerHeight){ 
+
+oldww=ww; 
+oldhh=hh;
+ww=window.innerWidth;
+hh=window.innerHeight;
+
+el('canvid').width=ww;
+el('canvid').style.width=ww+'px';
+el('canvid').height=hh;
+el('canvid').style.height=hh+'px';
+setBimg();
+
+w_zoomRatio=ww/oldww;
+h_zoomRatio=hh/oldhh;
+for(let k=0;k<numCars;k++){
+car[k].position.x*=w_zoomRatio;
+car[k].position.y*=h_zoomRatio;
+}//end numCars
+
+//resetDefaultView();
+oldZoomW=zoomW;
+oldZoomH=zoomH;
+
+let zr=ww/oldww;
+zoomW*=zr;
+zoomH*=zr;
+zoomLeft*=zr;
+zoomTop*=zr;
+lefter*=zr;
+topper*=zr;
+
+setZimg();
+
+setBorderDiv();
+
+
+oldZoomW=zoomW;
+oldZoomH=zoomH;
+}//end if ww!=innerWidth
+}//end detectBrowserZoom
+
+/*
+var lastCalledTime=0;
+var fps=0;
+function calcFPS(){
+if(!lastCalledTime){
+lastCalledTime = performance.now();
+     fps = 0;
+     return;
+  }
+  delta = (Date.now() - lastCalledTime)/1000;
+  lastCalledTime = Date.now();
+  fps = 1/delta;
+
+}//end calcFPS
+*/
+
+el('canvid').focus();
+
+//so does not keep running when you are not on the page
+window.onblur=function(){paused=true;document.title='paused - Self Driving Squares';}
+window.onfocus=function(){if(paused){paused=false;ticker();document.title='running - Self Driving Squares';}}
+
+ticker();
+</script>
