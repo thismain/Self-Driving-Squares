@@ -437,6 +437,7 @@ da('tester', '<b>Help: <span style="color:#00ff00">h</span> key</b><BR>'+
 '&bull; <span style="color:#00ff00">c</span> key to remove 50 cars<BR>'+
 '&bull; <span style="color:#00ff00">i</span> key to load a new street map<BR>'+
 '&bull; <span style="color:#00ff00">p</span> key to pause/resume<BR>'+
+'&bull; <span style="color:#00ff00">k</span> key to set random car positions<BR>'+
 '&bull; <span style="color:#00ff00">f</span> key to show fps, click fps to see ms, and memory usage<BR>'+
 '&bull; <span style="color:#00ff00">q</span> key to hide the question mark<BR>'+
 '&bull; <a target="_blank" href="https://github.com/thismain/self_driving_squares_using_matter.js">files on github</a>'
@@ -476,6 +477,7 @@ zImg.src=imageFiles[ii];
 resetDefaultView();
 break;
 case 'k':
+initCars();
 break;
 case 'f':
 showFps=!showFps;
@@ -501,7 +503,7 @@ case 't':
 break;
 case 'g':
 //extra tickers for faster animation
-ticker();
+//ticker();
 break;
 
 case 'q':
