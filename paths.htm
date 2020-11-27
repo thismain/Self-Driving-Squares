@@ -69,6 +69,8 @@ var ii=imageFiles.length-1;
 var roadR=[255,255,255,255,255,255,255];
 var zoomer=false;
 var paused=false;
+var flasher=false;
+var flasherTick=0;
 
 var oldNumCars=0;
 var numCars=100;
@@ -296,12 +298,12 @@ render.options.pixelRatio=1;
 
 for(let k=oldNumCars;k<numCars;k++){
 
-car[k] = Bodies.rectangle(startPos[k].x, startPos[k].y, 4, 4, {
+car[k] = Bodies.rectangle(startPos[k].x, startPos[k].y, 6, 6, {
 angle: fixAngleRad(randRange(0,2*Math.PI)),
 restitution:.9,
 id:k,
-width:6,
-height:6,
+width:8,
+height:8,
 friction:0,
 render:{strokeStyle:'#000000',lineWidth:1, fillStyle: randHexColor()}
 }
@@ -507,6 +509,15 @@ carVel[i]*=.98;
 if(!steerLeft[i]&&!steerRight[i]){
 steerAng[i]*=.4;}
 
+if(i==ci){
+flasherTick--;
+if(flasherTick<0){flasher=!flasher;flasherTick=5;}
+if(flasher){
+car[i].render.fillStyle='#000000';
+}else{
+car[i].render.fillStyle='#ff0000';
+}}//end if i==ci
+
 }//end all cars loop
 
 stats.end();
@@ -556,13 +567,14 @@ da('tester', '<b>Help: <span style="color:#00ff00">h</span> key</b><BR>'+
 '&bull; left mouse button to pan<BR>'+
 '&bull; mouse wheel to zoom in and out, centered on the cursor<BR>'+
 '&bull; middle mouse click to toggle fullscreen<BR>'+
-'&bull; double click to reset to default view (after panning and zooming)<BR>'+
-'&bull; arrow keys to steer controllable square (the one which ignores roads)<BR>'+
+'&bull; arrow keys to steer controllable square (the flashing one)<BR>'+
+'&bull; <span style="color:#00ff00">m</span> key or double click to reset to default view<BR>'+
 '&bull; <span style="color:#00ff00">v</span> key to add 50 cars<BR>'+
 '&bull; <span style="color:#00ff00">c</span> key to remove 50 cars<BR>'+
 '&bull; <span style="color:#00ff00">i</span> key to load a new street map<BR>'+
 '&bull; <span style="color:#00ff00">p</span> key to pause/resume<BR>'+
-'&bull; <span style="color:#00ff00">f</span> key to show fps<BR>'+
+'&bull; <span style="color:#00ff00">k</span> key to set random car positions<BR>'+
+'&bull; <span style="color:#00ff00">f</span> key to show fps, click fps to see ms, and memory usage<BR>'+
 '&bull; <span style="color:#00ff00">q</span> key to hide the question mark<BR>'+
 '&bull; <a target="_blank" href="https://github.com/thismain/self_driving_squares_using_matter.js">files on github</a>'
 );
@@ -604,6 +616,14 @@ resetDefaultView();
 initCars();
 break;
 case 'k':
+setCarDefaults();
+for(let k=0;k<numCars;k++){
+Body.translate(car[k], 
+Matter.Vector.sub(
+{x: startPos[k].x, y: startPos[k].y},
+{x:car[k].position.x, y:car[k].position.y} 
+) );
+}
 break;
 case 'f':
 showingFPS=!showingFPS;
