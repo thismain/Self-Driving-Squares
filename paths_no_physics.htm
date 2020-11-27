@@ -232,6 +232,7 @@ stats.dom.style.visibility='hidden';
 
 //the ticker loop
 function ticker(time){ 
+if(!paused){
 stats.begin();
 ctx.clearRect(0,0,ww,hh);	
 
@@ -373,9 +374,9 @@ renderCars(i);
 
 detectBrowserZoom();
 stats.end();
-if(!paused){
+}//end if !paused
 window.requestAnimationFrame(ticker);
-} 
+ 
 
 } //end ticker function
 
@@ -493,8 +494,6 @@ break;
 case 't':
 break;
 case 'g':
-//extra tickers for faster animation
-//ticker();
 break;
 
 case 'q':
@@ -535,7 +534,7 @@ break;
 case 'y':
 break;
 case 'p': 
-paused=!paused;if(!paused){ticker();document.title='running - Self Driving Squares';}else{document.title='paused - Self Driving Squares';}
+paused=!paused;if(!paused){document.title='running - Self Driving Squares';}else{document.title='paused - Self Driving Squares';}
 break;
 }
 }//end keydowner
@@ -751,7 +750,7 @@ el('canvid').focus();
 
 //so does not keep running when you are not on the page
 window.onblur=function(){paused=true;document.title='paused - Self Driving Squares';}
-window.onfocus=function(){if(paused){paused=false;ticker();document.title='running - Self Driving Squares';}}
+window.onfocus=function(){if(paused){paused=false;document.title='running - Self Driving Squares';}}
 
 ticker();
 </script>
