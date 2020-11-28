@@ -70,6 +70,7 @@ var zoomer=false;
 var paused=false;
 var flasher=false;
 var flasherTick=0;
+var keyBack=false;
 
 var numCars=200;
 var changingNumCars=false;
@@ -344,7 +345,7 @@ carVel[i]-=thrustInc+spinThrust[i]+offRoadThrust[i];
 reverseDir[i]=-1;
 }
 
-goForward[i]=true;
+if(i!==ci||!keyBack){goForward[i]=true;}
 
 }else{  //when over speed limit
 //carVel[i]*=.99;
@@ -520,10 +521,10 @@ if(carVel[ci]<0){carVel[ci]=0;}
 break;
 
 case 's': case 'ArrowDown':
+keyBack=true;
 goForward[ci]=false;
 goBackward[ci]=true; 
-if(carVel[ci]>0){carVel[ci]=0;}
-
+if(carVel[ci]>0){carVel[ci]=-1;}
 break;
 
 case 'a': case 'ArrowLeft': 
@@ -556,7 +557,7 @@ goForward[ci]=false;
 break;
 
 case 's': case 'ArrowDown':
-goBackward[ci]=false; 
+goBackward[ci]=false; keyBack=false;
 break;
 
 case 'a': case 'ArrowLeft':
