@@ -36,7 +36,7 @@ The images required some manual processing, to change the width/height ratio, an
 
 <canvas id="canvid" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:1000;" ></canvas>
 <canvas id="canvasBG" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:900;visibility:hidden;display:none;"></canvas>
-<canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;"></canvas>
+<canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;background-color:#ffffff;"></canvas>
 <div id="borderDiv" style="visibility:visible;z-index:9000;position:absolute;width:1px;height:1px;left:-10px;top:-10px;" ></div>
 
 <div id="tester" style="display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;" onclick="showHelp=false;this.style.display='none';"></div>
@@ -54,10 +54,15 @@ function el(a){return document.getElementById(a);}
 function da(a,b){if(el(a)){el(a).innerHTML=b;el(a).style.display='block';}}
 function fixAngleRad(a){if(a>Math.PI){a-=Math.PI*2;}else if(a<-Math.PI){a+=Math.PI*2;}return a;}
 function randRange(min, max){return Math.floor(Math.random() * (max - min + 1)) + min;}
-function randHexColor(){return '#'+Math.floor(Math.random()*16777215).toString(16);}
 function subber(a,b){return {x:a.x-=b.x, y: a.y-=b.y};}
+function randHexColor(){return '#'+Math.floor(Math.random()*16777215).toString(16);}
 function componentToHex(c){var hex=c.toString(16);return hex.length==1?"0"+hex:hex;}
 function rgbToHex(r,g,b){return "#"+componentToHex(r)+componentToHex(g)+componentToHex(b);}
+function random_rgba(){
+let o = Math.round;
+return 'rgba(' + o(randRange(-100,355)) + ',' + o(randRange(-40,255)) + ',' + o(randRange(0,255))+ ',' + 1 + ')';
+}//end random_rgba
+
 
 var ctx=el('canvid').getContext('2d');
 var showHelp=false;
@@ -74,8 +79,6 @@ var keyBack=false;
 
 var numCars=200;
 var changingNumCars=false;
-var carSize=6;
-var carSizeZoom=carSize;
 var ctxScale=1;
 var ww=window.innerWidth;
 var oldww=ww;
@@ -83,8 +86,6 @@ var w_zoomRatio=ww/oldww;
 var hh=window.innerHeight;
 var oldhh=hh;
 var h_zoomRatio=hh/oldhh;
-
-
 
 el('tester').style.maxWidth=ww*.8+'px';
 
@@ -108,7 +109,12 @@ var bgCtx=el('canvasBG').getContext('2d');
 var bImg=new Image();
 bImg.src=imageFiles[ii]; 
 da('tester', 'Loading Street Map Image...');
-bImg.onload=function(){setBimg();setZimg();el('tester').style.display='none';}
+bImg.onload=function(){
+setBimg();
+setZimg();
+drawZimg();
+el('tester').style.display='none';
+}//end bImg onload
 
 function setBimg(){
 el('canvasBG').width=ww;
@@ -128,12 +134,14 @@ el('canvasZoom').width=ww;
 el('canvasZoom').style.width=ww+'px';
 el('canvasZoom').height=hh;
 el('canvasZoom').style.height=hh+'px'
-el('canvasZoom').style.left=0+'px';
-el('canvasZoom').style.top=0+'px';
-el('canvasZoom').style.backgroundColor='#ffffff';
+el('canvasZoom').style.left='0px';
+el('canvasZoom').style.top='0px';
+}//end setZimg
+
+function drawZimg(){
 zCtx.clearRect(0, 0, ww, hh);
 zCtx.drawImage(bImg, zoomLeft+lefter, zoomTop+topper, zoomW, zoomH);
-}//end setZimg
+}//end draw zimg
 
 
 var borderW=100;
@@ -150,6 +158,7 @@ el('borderDiv').style.boxShadow='inset 0px 0px 1px 1px #586474';
 setBorderDiv();
 
 var car=[];
+var carSize=[];
 var ci=0;
 
 var goForward=[];
@@ -167,6 +176,26 @@ var steerAngMax=[];
 var rightSpin=[];
 var leftSpin=[];
 var spinThrust=[];
+var colliding=[];
+var collisionTick=0;
+var explodeAlpha=1;
+var numParticles=20;
+var particleSize=[];
+var particleAngle=[];
+var particleSpeed=[];
+var particleAccel=[];
+
+function resetParticles(){
+for(let i=0;i<numParticles;i++){
+particleSize[i]=Math.round(randRange(2,5));
+particleAngle[i]=randRange(-2*Math.PI,2*Math.PI);
+particleSpeed[i]=.5;
+particleAccel[i]=Math.random()*2;
+explodeAlpha=1;
+}//end numParticles
+}//end reset particles
+
+resetParticles();
 
 var offRoadCounter=[];
 var offRoadThrust=[];
@@ -177,6 +206,7 @@ var steerAngInc=.03;//.0013;
 function setCarDefaults(){
 for(let i=0;i<numCars;i++){
 
+carSize[i]=7;
 goForward[i]=true;
 goBackward[i]=false;
 reverseDir[i]=1;
@@ -194,6 +224,8 @@ rightSpin[i]=0;
 leftSpin[i]=0;
 spinThrust[i]=0;
 
+colliding[i]=false;
+
 offRoadCounter[i]=true;
 offRoadThrust[i]=.2;
 }//end set car array vars
@@ -210,10 +242,13 @@ angle: randRange(-2*Math.PI,2*Math.PI),
 id:k,
 strokeStyle:'#000000',
 lineWidth:.5, 
-fillStyle: randHexColor()
+fillStyle: random_rgba()//randHexColor()//randHexColor()
 }
 
 }//end numCars loop
+
+//the controllable car
+carSize[ci]=10;
 car[ci].fillStyle='#000000';
 car[ci].altFill='#ff0000';
 }//end make cars
@@ -239,14 +274,39 @@ if(!changingNumCars){
 stats.begin();
 ctx.clearRect(0,0,ww,hh);	
 
+//for if the controllable square collides, it explodes
+if(!colliding[ci]){
+if(collisionOccurring(car[ci].position.x, car[ci].position.y)){}
+}
+
+if(colliding[ci]){ 
+collisionTick++;
+keyBack=true; 
+goForward[ci]=false; 
+carVel[ci]=0;
+car[ci].strokeStyle='rgba(0,0,0,0)';
+renderExplosion();
+
+if(collisionTick>60){
+resetParticles();
+collisionTick=0;
+colliding[ci]=false;
+keyBack=false;
+goForward[ci]=true;
+car[ci].strokeStyle='#000000';
+
+}//end reset after colliding
+}//end if colliding
+
+
 for(let i=0;i<numCars;i++){
 
 if(i!=ci){
 
 // check straight ahead
 {
-let aheadX=car[i].position.x+carSize*.5+Math.cos(car[i].angle)*10;
-let aheadY=car[i].position.y+carSize*.5+Math.sin(car[i].angle)*10;
+let aheadX=car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle)*10;
+let aheadY=car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle)*10;
 
 let cS=bgCtx.getImageData(
 aheadX,
@@ -263,8 +323,8 @@ carVel[i]*=.95;
 // check leftward ahead, getImatgeData(x,y,width,height)
 {
 let cR=bgCtx.getImageData(
-car[i].position.x+carSize*.5+Math.cos(car[i].angle-0.5)*4,	 
-car[i].position.y+carSize*.5+Math.sin(car[i].angle-0.5)*4,
+car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle-0.5)*4,	 
+car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle-0.5)*4,
 1,1);
 
 //if road detected leftward
@@ -277,8 +337,8 @@ goBackward[i]=false
 // check rightward ahead
 {
 let cL=bgCtx.getImageData(
-car[i].position.x+carSize*.5+Math.cos(car[i].angle+0.5)*4,
-car[i].position.y+carSize*.5+Math.sin(car[i].angle+0.5)*4,
+car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle+0.5)*4,
+car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle+0.5)*4,
 1,1);
 
 if(cL.data[0]==roadR[ii]){
@@ -364,15 +424,56 @@ car[i].angle+=steerAng[i]*reverseDir[i];
 car[i].position.x+=Math.cos(car[i].angle) * carVel[i];
 car[i].position.y+=Math.sin(car[i].angle) * carVel[i]; 
 
+//wrap at edges
+if(car[i].position.x>ww+carSize[i]){car[i].position.x=-carSize[i];
+}else if(car[i].position.x<-carSize[i]){car[i].position.x=ww+carSize[i];}
 
-if(car[i].position.x>ww+carSizeZoom){car[i].position.x=-carSizeZoom;
-}else if(car[i].position.x<-carSizeZoom){car[i].position.x=ww+carSizeZoom;}
-
-if(car[i].position.y>hh+carSizeZoom){car[i].position.y=-carSizeZoom;
-}else if(car[i].position.y<-carSizeZoom){car[i].position.y=hh+carSizeZoom;}
+if(car[i].position.y>hh+carSize[i]){car[i].position.y=-carSize[i];
+}else if(car[i].position.y<-carSize[i]){car[i].position.y=hh+carSize[i];}
 
 renderCars(i);
 }//end all cars loop
+
+
+//render explosion if controllable car collides
+function renderExplosion(){
+for(let q=0;q<numParticles;q++){
+particleSpeed[q]+=particleAccel[q];
+particleSize[q]+=.01;
+
+zoomRatioW=zoomW/ww;
+zoomRatioH=zoomH/hh;
+
+let rendPosX=zoomLeft+lefter+
+(
+(car[ci].position.x+carSize[ci]*.5) +
+(Math.cos(particleAngle[q])*particleSpeed[q]+particleSize[q]*.5)
+)
+*zoomRatioW;
+
+let rendPosY=zoomTop+topper+
+(
+(car[ci].position.y+carSize[ci]*.5) +
+(Math.sin(particleAngle[q])*particleSpeed[q]+particleSize[q]*.5)
+)
+*zoomRatioH;
+
+ctx.save();
+
+ctx.translate(rendPosX,rendPosY);
+ctx.rotate(particleAngle[q]);
+
+explodeAlpha*=.997;
+ctx.strokeStyle='rgba(255,255,0,'+explodeAlpha+')';//'#ffff00';
+ctx.lineWidth=.5*zoomRatioW;
+ctx.fillStyle='rgba(255,102,0,'+explodeAlpha+')';//'#ff6600';'
+
+let particleSizeZoom=particleSize[q]*zoomRatioW;
+ctx.fillRect(-particleSizeZoom/2,-particleSizeZoom/2, particleSizeZoom, particleSizeZoom); 
+ctx.strokeRect(-particleSizeZoom/2,-particleSizeZoom/2, particleSizeZoom, particleSizeZoom);
+ctx.restore();
+}//end numParticles
+}//end render explosion
 
 
 detectBrowserZoom();
@@ -391,8 +492,8 @@ function renderCars(i){
 zoomRatioW=zoomW/ww;
 zoomRatioH=zoomH/hh;
 
-let rendPosX=zoomLeft+lefter+(car[i].position.x+carSize*.5)*zoomRatioW;
-let rendPosY=zoomTop+topper+(car[i].position.y+carSize*.5)*zoomRatioH;
+let rendPosX=zoomLeft+lefter+(car[i].position.x+carSize[i]*.5)*zoomRatioW;
+let rendPosY=zoomTop+topper+(car[i].position.y+carSize[i]*.5)*zoomRatioH;
 
 ctx.save();
 
@@ -403,7 +504,7 @@ ctx.strokeStyle=car[i].strokeStyle;
 ctx.lineWidth=car[i].lineWidth*zoomRatioW;
 ctx.fillStyle=car[i].fillStyle;
 
-if(i==ci){
+if(i==ci&&!colliding[ci]){
 flasherTick--;
 if(flasherTick<0){flasher=!flasher;flasherTick=5;}
 if(flasher){
@@ -411,15 +512,16 @@ ctx.fillStyle=car[i].fillStyle;
 }else{
 ctx.fillStyle=car[i].altFill;
 }}//end if i==ci
+else if(i==ci&&colliding[ci]){
+ctx.fillStyle='rgba(0,0,0,0)';
+}
 
-carSizeZoom=carSize*zoomRatioW;
+let carSizeZoom=carSize[i]*zoomRatioW;
 ctx.fillRect(-carSizeZoom/2,-carSizeZoom/2, carSizeZoom, carSizeZoom); 
 ctx.strokeRect(-carSizeZoom/2,-carSizeZoom/2, carSizeZoom, carSizeZoom);
 ctx.restore();
 
 }//end renderCars
-
-
 
 document.body.addEventListener("keydown", keydowner);
 document.body.addEventListener("keyup", keyupper);
@@ -639,7 +741,7 @@ zoomLeft+=(oldZoomW-zoomW)*mulx;
 zoomTop+=(oldZoomH-zoomH)*muly;
 
 //canvasZoom
-setZimg();
+drawZimg();
 
 setBorderDiv();
 
@@ -678,7 +780,7 @@ lefter+=event.clientX-oldx;
 topper+=event.clientY-oldy;
 
 //canvasZoom
-setZimg();
+drawZimg();
 
 
 el('borderDiv').style.left=zoomLeft+lefter-borderZoom+'px';
@@ -704,7 +806,7 @@ oldZoomW=zoomW;
 oldZoomH=zoomH;
 
 //canvasZoom
-setZimg();
+drawZimg();
 
 setBorderDiv();
 
@@ -736,24 +838,39 @@ car[k].position.y*=h_zoomRatio;
 oldZoomW=zoomW;
 oldZoomH=zoomH;
 
-let zr=ww/oldww;
-zoomW*=zr;
-zoomH*=zr;
-zoomLeft*=zr;
-zoomTop*=zr;
-lefter*=zr;
-topper*=zr;
+zoomW*=w_zoomRatio;
+zoomH*=w_zoomRatio;
+zoomLeft*=w_zoomRatio;
+zoomTop*=w_zoomRatio;
+lefter*=w_zoomRatio;
+topper*=w_zoomRatio;
 
 //canvasZoom
 setZimg();
+drawZimg();
 
 setBorderDiv();
-
 
 oldZoomW=zoomW;
 oldZoomH=zoomH;
 }//end if ww!=innerWidth
 }//end detectBrowserZoom
+
+
+//check if wider bounds than collision bounds are overlapping, w=range
+function collisionOccurring(cx, cy){
+for(let j=0;j<numCars;j++){
+if(j!=ci){
+if(cx <= car[j].position.x+carSize[j] && cx+carSize[ci] >= car[j].position.x
+&& cy+carSize[ci] >= car[j].position.y && cy <= car[j].position.y+carSize[j]){
+colliding[ci]=true; 
+return true;
+}//if overlapping
+}//end j!=ci
+}//end numCars loop
+return false;
+}//end collision almost occurring
+
 
 el('canvid').focus();
 
