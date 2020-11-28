@@ -481,20 +481,20 @@ if(showFps){stats.dom.style.visibility='visible';}else{stats.dom.style.visibilit
 break;
 case 'h': 
 showHelp=!showHelp;
-if(showHelp){ displayHelp();
+if(showHelp){ displayHelp(); 
 }else{el('tester').style.display='none';}
 
 break;
 case 'v': 
 changingNumCars=true;
-numCars+=50; el('numcars').value=numCars;
+numCars+=50; if(showHelp){el('numcars').value=numCars;}
 initCars();
 changingNumCars=false;
 break;
 case 'c': 
 changingNumCars=true;
 if(numCars>50){
-numCars-=50; el('numcars').value=numCars;
+numCars-=50; if(showHelp){el('numcars').value=numCars;}
 initCars();
 }
 changingNumCars=false;

@@ -639,14 +639,14 @@ if(showHelp){ displayHelp();
 break;
 case 'v':
 changingNumCars=true;
-numCars+=50; el('numcars').value=numCars;
+numCars+=50; if(showHelp){el('numcars').value=numCars;}
 initCars();
 changingNumCars=false;
 break;
 case 'c':
 if(numCars>50){
 changingNumCars=true;
-numCars-=50; el('numcars').value=numCars;
+numCars-=50; if(showHelp){el('numcars').value=numCars;}
 removeCars();
 changingNumCars=false;
 }
