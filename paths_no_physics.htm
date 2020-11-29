@@ -32,11 +32,11 @@ The images required some manual processing, to change the width/height ratio, an
 -->
 <script src="stats.js"></script>
 </head>
-<body id="bodid" style="overflow:hidden;background-color:#ffffff;zoom:1;">
+<body id="bodid" style="overflow:hidden;background-color:#000000;zoom:1;">
 
 <canvas id="canvid" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:1000;" ></canvas>
 <canvas id="canvasBG" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:900;visibility:hidden;display:none;"></canvas>
-<canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;background-color:#ffffff;"></canvas>
+<canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;"></canvas>
 <div id="borderDiv" style="visibility:visible;z-index:9000;position:absolute;width:1px;height:1px;left:-10px;top:-10px;" ></div>
 
 <div id="tester" style="display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;" onclick="showHelp=false;this.style.display='none';"></div>
@@ -136,6 +136,7 @@ el('canvasZoom').height=hh;
 el('canvasZoom').style.height=hh+'px'
 el('canvasZoom').style.left='0px';
 el('canvasZoom').style.top='0px';
+el('canvasZoom').style.backgroundColor='#ffffff';
 }//end setZimg
 
 function drawZimg(){
@@ -577,6 +578,7 @@ case 'm':
 resetDefaultView();
 break;
 case 'i':
+el('canvasZoom').style.backgroundColor='#000000';
 if(!altKey){ii--; if(ii<0){ii=imageFiles.length-1;}}else{
 ii++;if(ii>=imageFiles.length){ii=0;}
 }
