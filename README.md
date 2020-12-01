@@ -2,24 +2,33 @@
 
 November 15, 2020  
 Live demo: http://drive.x10host.com/city/paths.htm  
-No Physics Version demo: http://drive.x10host.com/city/selfDrivingSquares.htm  
+Game Version demo: http://drive.x10host.com/city/selfDrivingSquares.htm  
 [![screenshot](https://github.com/thismain/Self-Driving-Squares/blob/main/screenshot8.png?raw=true)](http://drive.x10host.com/city/paths.htm)  
   
-Tiny squares, which I refer to as cars, find their way along the streets in an image. Pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling colors in the image. There are a few different street maps to try. Here are the shortcut keys: 
+Tiny squares, which I refer to as cars, find their way along the streets in an image. Pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling colors in the image. There are a few different street maps to try. In the game version, two squares, one red, one blue, shoot at each other, while also dodging squares. You can take control of the red square with your arrow keys.  
+  
+Here are the shortcut keys: 
 <ul>
-<li><strong>h</strong> key for help</li>
 <li>left mouse button to pan</li>
-<li>mouse wheel to zoom in and out, centered on the cursor</li>
+<li>mouse wheel to zoom</li>
+<li><strong>m</strong> key or double click to reset default view</li>
 <li>middle mouse click to toggle fullscreen</li>
-<li>arrow keys to steer controllable square (the flashing one)</li>
-<li><strong>m</strong> key or double click to reset to default view</li>
-<li><strong>v</strong> key to add 50 cars</li>
+<li>arrow keys to control red flashing square</li>
+<li><strong>shift</strong> key to fire</li>
+<li><strong>spacebar</strong> key to stop moving</li>
+<li><strong>y</strong> key to let red square control itself</li>
+<li><strong>u</strong> key to toggle war game</li>
+          game points: 5 wins; hit=1; get hit=-1; collide=-1</li> 
+<li><strong>j</strong> key to show score</li>
+<li><strong>n</strong> key to start new game</li>
+<li><strong>v</strong> key to add 50 cars </li>
 <li><strong>c</strong> key to remove 50 cars</li>
 <li><strong>i</strong> key to load a new street map</li>
 <li><strong>p</strong> key to pause/resume</li>
 <li><strong>k</strong> key to set random car positions</li>
-<li><strong>f</strong> key to show fps, click fps to see ms, and memory usage</li>
+<li><strong>f</strong> key to show fps, click for ms, memory usage</li>
 <li><strong>q</strong> key to hide the question mark</li>
+<li><strong>h</strong> key to toggle this help screen</li>
 </ul>
   
 I am using mrdoob's stats.js: for fps:  
