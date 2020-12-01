@@ -315,8 +315,8 @@ colliding[j]=false;
 //try max 10 times to put car in empty spot after collision and explosion, so does not immediately explode upon spawning
 almostColliding[j]=true;
 for(let i=0;i<10&&almostColliding[j];i++){
-car[j].position.x=ww/2+randRange(-200,200);
-car[j].position.y=hh/2+randRange(-200,200);
+car[j].position.x=ww/2+randRange(-300,300);
+car[j].position.y=hh/2+randRange(-300,300);
 collisionAlmostOccurring(j,60);
 }
 
