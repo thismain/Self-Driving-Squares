@@ -337,6 +337,7 @@ resetParticles(ci);
 resetParticles(ei);
 
 var carFiring=[false,false];//for ci and ei
+var fireLock=[false,false];
 var fireCounter=[0,0];
 var numBullets=20;
 var bulletColor=['#ff0000', '#0000ff'];
@@ -600,7 +601,8 @@ ctx.restore();
 
 
 //render explosion if controllable car collides
-function renderExplosion(i){ //i=car, q=particle
+function renderExplosion(i,numPasses){ //i=car, q=particle
+for(let e=0;e<numPasses;e++){
 for(let q=numParticles*i;q<numParticles*i+numParticles;q++){
 particleSpeed[q]+=particleAccel[q];
 particleSize[q]+=.01;
@@ -639,6 +641,7 @@ ctx.fillRect(-particleSizeZoom/2,-particleSizeZoom/2, particleSizeZoom, particle
 ctx.strokeRect(-particleSizeZoom/2,-particleSizeZoom/2, particleSizeZoom, particleSizeZoom);
 ctx.restore();
 }//end numParticles
+}//end numPasses
 }//end render explosion
 
 
@@ -845,6 +848,7 @@ userControlled=true;
 steerRight[ci]=true; rightSteerAng[ci]=steerAngInc; leftSteerAng[ci]=0;
 break;
 case 'l':
+fireLock[ci]=true;
 break;
 case 'o':
 break;
@@ -897,6 +901,7 @@ fireCounter[ei]=0;
 carFiring[ei]=false;
 break;
 case 'Shift': case ' ':
+fireLock[ci]=false;
 fireCounter[ci]=0;
 carFiring[ci]=false;
 break;
@@ -1171,7 +1176,9 @@ collisionTick[i]++;
 goForward[i]=false; 
 carVel[i]=0;
 car[i].strokeStyle='rgba(0,0,0,0)';
-renderExplosion(i);
+
+renderExplosion(i,4);
+
 
 if(collisionTick[i]>60){
 resetParticles(i);
@@ -1203,7 +1210,7 @@ return;
 
 
 function fireShot(c){
-if(carFiring[c]&&!colliding[c]){
+if((carFiring[c]||fireLock[c])&&!colliding[c]){
 fireCounter[c]--;
 if(fireCounter[c]<0){ 
 fireCounter[c]=10;
