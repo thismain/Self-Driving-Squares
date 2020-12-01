@@ -1,8 +1,8 @@
 # Self-Driving-Squares
 
 November 15, 2020  
-Live demo: http://drive.x10host.com/city/paths.htm  
-Game Version demo: http://drive.x10host.com/city/selfDrivingSquares.htm  
+Live demo (physics version): http://drive.x10host.com/city/paths.htm  
+Game Version demo (no physics): http://drive.x10host.com/city/selfDrivingSquares.htm  
 [![screenshot](https://github.com/thismain/Self-Driving-Squares/blob/main/screenshot8.png?raw=true)](http://drive.x10host.com/city/paths.htm)  
   
 Tiny squares, which I refer to as cars, find their way along the streets in an image. Pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling colors in the image. There are a few different street maps to try. In the game version, two squares, one red, one blue, shoot at each other, while also dodging squares. You can take control of the red square with your arrow keys.  
@@ -34,7 +34,7 @@ Here are the shortcut keys:
 I am using mrdoob's stats.js: for fps:  
 https://github.com/mrdoob/stats.js/  
   
-I am using the Matter.js  2d physics library for animation and rendering of the squares:  
+I am using (in the non game version) the Matter.js 2d physics library for animation and rendering of the squares:  
 https://brm.io/matter-js/  
 https://github.com/liabru/matter-js  
   
@@ -50,5 +50,5 @@ https://static8.depositphotos.com/1303735/951/v/950/depositphotos_9519225-stock-
 and  
 https://www.google.com/maps/  
   
-The images required some manual processing, to change the width/height ratio, and to remove the non-white pixels from the streets, for doing which I used Gimp.  
+The images required some manual processing, to change the width/height ratio, and to make sure the white streets are pure white, and in come cases to mirror horizontally and vertically, for doing which I used Gimp.  
   
