@@ -30,6 +30,22 @@ The images required some manual processing, to change the width/height ratio, an
 <script src="matter.js"></script>
 <script src="matter-wrap.js"></script>
 -->
+<style>
+.ui{
+line-height:26px;
+font-size:18px;
+color:#00ff00;
+border:1px solid #00ff00;
+text-align:center;
+padding-left:4px;
+padding-right:4px;
+font-weight:bold;
+cursor:pointer
+}
+span:hover{
+background-color:#004705;
+}
+</style>
 <script src="stats.js"></script>
 </head>
 <body id="bodid" style="overflow:hidden;background-color:#000000;zoom:1;">
@@ -37,13 +53,27 @@ The images required some manual processing, to change the width/height ratio, an
 <canvas id="canvid" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:1000;" ></canvas>
 <canvas id="canvasBG" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:900;visibility:hidden;display:none;"></canvas>
 <canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;"></canvas>
-<div id="borderDiv" style="visibility:visible;z-index:9000;position:absolute;width:1px;height:1px;left:-10px;top:-10px;" ></div>
+<div id="borderDiv" style="visibility:visible;z-index:1005;position:absolute;width:1px;height:1px;left:-10px;top:-10px;" ></div>
 
-<div id="tester" style="display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;" onclick="showHelp=false;this.style.display='none';"></div>
+<div id="loadingStreetMap" style="opacity:.9;display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;"></div>
+
+<div id="tester" style="opacity:.9;display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:30px;border:2px solid #ffffff;overflow:auto;max-height:600px;" onmouseover="scrollingHelp=true;" onmouseout="scrollingHelp=false;"></div>
+
+<div id="helpDiv" style="z-index:10000;position:absolute;top:4;left:4px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:16px;padding-top:0px;padding-bottom:0px;padding-right:6px;padding-left:6px;border:2px solid #ffffff;opacity:.3;cursor:pointer;" onmousedown="this.style.backgroundColor='#00ff00';showHelp=!showHelp;if(showHelp){displayHelp();}else{el('tester').style.display='none';}" onmouseup="this.style.backgroundColor='#000000';" onmouseover="this.style.backgroundColor='#00800f';" onmouseout="this.style.backgroundColor='#000000';"><b>?</b>
+</div>
 
 
-<div id="helpDiv" style="z-index:10000;position:absolute;top:4;left:4px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:16px;padding-top:0px;padding-bottom:0px;padding-right:6px;padding-left:6px;border:2px solid #ffffff;opacity:.3;cursor:pointer;" onmousedown="this.style.backgroundColor='#00ff00';showHelp=!showHelp;if(showHelp){displayHelp();}else{el('tester').style.display='none';}" onmouseup="this.style.backgroundColor='#000000';" onmouseover="this.style.backgroundColor='#00800f';" onmouseout="this.style.backgroundColor='#000000';"><b>?</b></div>
 
+
+<div id="scoreBlue" style="z-index:1010;color:rgba(255,255,255,1);background-color:rgba(0,0,255,.5);border-radius:10px;width:50px;height:50px;top:0px;left:200px;position:absolute;border:5px solid rgba(255, 255, 255, .6);border-style:ridge;font-family:monospace;font-size:30px;text-align:center;line-height:50px;text-shadow: 2px 4px rgba(0,0,0,.95);font-weight:bold;"></div>
+
+<div id="scoreRed" style="z-index:1010;color:rgba(255,255,255,1);background-color:rgba(255,0,0,.5);border-radius:10px;width:50px;height:50px;top:0px;right:200px;position:absolute;border:5px solid rgba(255, 255, 255, .6);border-style:ridge;font-family:monospace;font-size:30px;text-align:center;line-height:50px;text-shadow: 2px 4px rgba(0,0,0,.95);font-weight:bold;"></div>
+
+<!--
+<div id="scoreBlue" style="opacity:.9;display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;"></div>
+
+<div id="scoreRed" style="z-index:10000;color:rgba(255,0,0,1);backgroundColor:rgba(255,0,0,.5);border-radius:10px;width:60px;height:60px;top:50px;right:50px;position;absolute;border:3px solid rgba(255, 0, 0, .5);border-style:ridge;font-family:arial;font-size:26px;"></div>
+-->
 
 </body>
 </html>
@@ -66,6 +96,7 @@ return 'rgba(' + o(randRange(-100,355)) + ',' + o(randRange(-40,255)) + ',' + o(
 
 var ctx=el('canvid').getContext('2d');
 var showHelp=false;
+var scrollingHelp=false;
 var showFps=false;
 var showQuestion=true;
 var imageFiles=['googleMap151.png','seamlessMapF.png','seamlessMap3.png','seamlessMap7a.png','googleMap3a.png','googleMap18b.png','googleMap115a.png'];
@@ -75,7 +106,7 @@ var zoomer=false;
 var paused=false;
 
 
-var numCars=100;
+var numCars=50;
 var changingNumCars=false;
 var ctxScale=1;
 var ww=window.innerWidth;
@@ -86,6 +117,7 @@ var oldhh=hh;
 var h_zoomRatio=hh/oldhh;
 
 el('tester').style.maxWidth=ww*.8+'px';
+el('tester').style.maxHeight=hh*.8+'px';
 
 el('canvid').width=ww;
 el('canvid').style.width=ww+'px';
@@ -106,12 +138,12 @@ var fullscreenMode=false;
 var bgCtx=el('canvasBG').getContext('2d');
 var bImg=new Image();
 bImg.src=imageFiles[ii]; 
-da('tester', 'Loading Street Map Image...');
+da('loadingStreetMap', 'Loading Street Map Image...');
 bImg.onload=function(){
 setBimg();
 setZimg();
 drawZimg();
-el('tester').style.display='none';
+el('loadingStreetMap').style.display='none';
 }//end bImg onload
 
 function setBimg(){
@@ -143,7 +175,7 @@ zCtx.drawImage(bImg, zoomLeft+lefter, zoomTop+topper, zoomW, zoomH);
 }//end draw zimg
 
 
-var borderW=100;
+var borderW=1000;
 function setBorderDiv(){
 borderZoom=borderW*zoomRatioW;
 el('borderDiv').style.width=zoomW+'px';
@@ -182,7 +214,11 @@ var flasher=[false,true];
 var flasherTick=[0,0];
 var explodeAlpha=[1.5,1.5];
 
-var roboWar=[true,true];
+var showScore=true;
+var score=[0,0];
+var peaceTime=false;
+var roboWar=[!peaceTime,!peaceTime];
+var userControlled=false;
 var colliding=[];
 var collisionTick=[];
 
@@ -253,12 +289,12 @@ fillStyle: random_rgba()//randHexColor()//randHexColor()
 //the controllable car
 car[ci].position.x=ww/2;
 car[ci].position.y=hh/2;
-carSize[ci]=9;
+carSize[ci]=10;
 car[ci].fillStyle='#000000';
 car[ci].altFill='#ff0000';
 
 //enemy car
-carSize[ei]=9;
+carSize[ei]=10;
 car[ei].fillStyle='#000000';
 car[ei].altFill='#0000ff';
 }//end make cars
@@ -273,10 +309,17 @@ initCars();
 
 function resetParticles(j){
 collisionTick[j]=0;
-colliding[j]=false;
 goForward[j]=true;
+colliding[j]=false;
+
+//try max 10 times to put car in empty spot after collision and explosion, so does not immediately explode upon spawning
+almostColliding[j]=true;
+for(let i=0;i<10&&almostColliding[j];i++){
 car[j].position.x=ww/2+randRange(-200,200);
 car[j].position.y=hh/2+randRange(-200,200);
+collisionAlmostOccurring(j,60);
+}
+
 car[j].angle=randRange(-2*Math.PI, 2*Math.PI);
 car[j].strokeStyle='#000000';
 explodeAlpha[j]=1.5;
@@ -338,15 +381,18 @@ ctx.clearRect(0,0,ww,hh);
 car[ci].angle=fixAngleRad(car[ci].angle);
 car[ei].angle=fixAngleRad(car[ei].angle);
 
-if(roboWar[ci]){
+if(!userControlled){
 collisionAlmostOccurring(ci,60);
+}
+collisionAlmostOccurring(ei,60);
+
+if(roboWar[ci]&&!userControlled){
 autoTarget(ci,ei);
 }
 
 if(roboWar[ei]){
-collisionAlmostOccurring(ei,60);
 autoTarget(ei,ci);
-}//end if !roboWar
+}
 
 
 fireShot(ci);
@@ -501,6 +547,8 @@ if(car[i].position.y>hh+carSize[i]){car[i].position.y=-carSize[i];
 renderCars(i);
 }//end all cars loop
 
+scoreBoard();
+
 
 detectBrowserZoom();
 stats.end();
@@ -653,29 +701,36 @@ document.body.addEventListener("keydown", keydowner);
 document.body.addEventListener("keyup", keyupper);
 
 function displayHelp(){
-da('tester', '<b>Help: <span style="color:#00ff00">h</span> key</b><BR>'+
+da('tester', 
 '&bull; left mouse button to pan<BR>'+
-'&bull; mouse wheel to zoom in and out, centered on the cursor<BR>'+
+'&bull; mouse wheel to zoom<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'m\')">m</span> key or double click to reset default view<BR>'+
 '&bull; middle mouse click to toggle fullscreen<BR>'+
-'&bull; arrow keys to steer controllable square (the flashing one)<BR>'+
-'&bull; <span style="color:#00ff00">m</span> key or double click to reset to default view<BR>'+
-'&bull; <span style="color:#00ff00">v</span> key to add 50 cars to: <input type="text" id="numcars" style="width:100px;border:none;background-color:#000000;display:inline-block;white-space: nowrap;color:#00ff00;font-size:18px;" value="'+numCars+'"></input><BR>'+
-'&bull; <span style="color:#00ff00">c</span> key to remove 50 cars<BR>'+
-'&bull; <span style="color:#00ff00">i</span> key to load a new street map<BR>'+
-'&bull; <span style="color:#00ff00">p</span> key to pause/resume<BR>'+
-'&bull; <span style="color:#00ff00">k</span> key to set random car positions<BR>'+
-'&bull; <span style="color:#00ff00">f</span> key to show fps, click fps to see ms, and memory usage<BR>'+
-'&bull; <span style="color:#00ff00">q</span> key to hide the question mark<BR>'+
-'&bull; <a target="_blank" href="https://github.com/thismain/Self-Driving-Squares">files on github</a>'
+'&bull; arrow keys to control red flashing square<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'Shift\')">shift</span> key to fire<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\' \')">spacebar</span> key to stop moving<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'y\')">y</span> key to let red square control itself<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'u\')">u</span> key to toggle war game<BR>'+
+'&nbsp;&nbsp;&nbsp;&nbsp; game points: 5 wins; hit=1; get hit=-1; collide=-1<BR>'+ 
+'&bull; <span class="ui" onmousedown="keySwitcher(\'j\')">j</span> key to show score<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'n\')">n</span> key to start new game<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'v\')">v</span> key to add 50 cars to: <input type="text" id="numcars" style="width:100px;border:none;background-color:#000000;display:inline-block;white-space: nowrap;color:#00ff00;font-size:18px;" value="'+numCars+'"></input><BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'c\')">c</span> key to remove 50 cars<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'i\')">i</span> key to load a new street map<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'p\')">p</span> key to pause/resume<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'k\')">k</span> key to set random car positions<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'f\')">f</span> key to show fps, click for ms, memory usage<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'q\')">q</span> key to hide the question mark<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'h\')">h</span> key to toggle this help screen<BR>'+
+'&bull; <a target="_blank" href="https://github.com/thismain/Self-Driving-Squares">files on github</a><span style="cursor:pointer;display:inline-block;z-index:100001;position:absolute;top:0px;right:0px;font-size:18px;color:#cdcdcd;border:1px solid #cdcdcd;width:20px;margin:8px;padding:2px;font-weight:bold;font-family:arial;text-align:center;" onmousedown="showHelp=false;el(\'tester\').style.display=\'none\';">X</span>'
 );
 }//end displayHelp
 
 if(showHelp){displayHelp();}
 
-var altKey=false;
-function keydowner(event){ 
-if(event.key=='z'){altKey=true;} 
-switch(event.key ){
+//so can use this switch for help screen onmousedown events: keySwitcher('y')
+function keySwitcher(f){
+switch(f){
 case '0':
 break;
 case '1':
@@ -683,6 +738,12 @@ break;
 case '2':
 break;
 case '3':
+break;
+case 'j':
+showScore=!showScore;
+break;
+case 'n':
+score=[0,0];
 break;
 case ' ':
 stopper=!stopper;
@@ -710,7 +771,7 @@ el('canvasZoom').style.backgroundColor='#000000';
 if(!altKey){ii--; if(ii<0){ii=imageFiles.length-1;}}else{
 ii++;if(ii>=imageFiles.length){ii=0;}
 }
-da('tester', 'Loading Street Map Image...');
+da('loadingStreetMap', 'Loading Street Map Image...');
 bImg.src=imageFiles[ii];
 resetDefaultView();
 resetParticles(ci);
@@ -761,51 +822,73 @@ break;
 case ' ':
 break;
 case 'w': case 'ArrowUp':
-roboWar[ci]=false;
+userControlled=true;
 goForward[ci]=true; 
-goBackward[ci]=false; 
+stopper=false;
 if(carVel[ci]<0){carVel[ci]=0;}
 break;
 
 case 's': case 'ArrowDown':
-roboWar[ci]=false;
+userControlled=true;
 goForward[ci]=false;
-goBackward[ci]=true; 
+stopper=true; 
 if(carVel[ci]>0){carVel[ci]=-1;}
 break;
 
 case 'a': case 'ArrowLeft': 
-roboWar[ci]=false;
+userControlled=true;
 steerLeft[ci]=true;  leftSteerAng[ci]=-steerAngInc; rightSteerAng[ci]=0;
 break;
 
 case 'd': case 'ArrowRight':
-roboWar[ci]=false;
+userControlled=true;
 steerRight[ci]=true; rightSteerAng[ci]=steerAngInc; leftSteerAng[ci]=0;
 break;
 case 'l':
 break;
 case 'o':
 break;
-case 'u':
-break;
-case 'y':
+case 'u': //toggle roboWar for both red and blue, independent of whether user controlling red square
+peaceTime=!peaceTime;
+if(peaceTime){
+score=[0,0];
+showScore=false;
+roboWar=[false,false];
+carFiring=[false,false];
 
-roboWar[ci]=!roboWar[ci];
+}else if(!peaceTime){
+score=[0,0];
+showScore=true;
+roboWar=[true,true];
+carFiring=[false,false];
+for(let b=0;b<numBullets;b++){resetBullet(ci,b);resetBullet(ei,b);}
+}//end if !peaceTime
+
+
+break;
+case 'y': //give control of red square back to algorithm
+userControlled=false;
+stopper=false;
 if(!roboWar[ci]){carFiring[ci]=false;}
 if(roboWar[ci]){
-resetParticles(ci);
-for(let b=0;b<numBullets;b++){
-resetBullet(ci,b);
-}
+for(let b=0;b<numBullets;b++){resetBullet(ci,b);}
 }
 break;
 case 'p': 
 paused=!paused;if(!paused){document.title='running - Self Driving Squares';}else{document.title='paused - Self Driving Squares';}
 break;
-}
+}//end switch
+}//end keySwitcher function 
+
+
+var altKey=false;
+function keydowner(event){ 
+if(event.key=='z'){altKey=true;} 
+keySwitcher(event.key);
 }//end keydowner
 
+
+//keyupper
 function keyupper(event){
 if(event.key=='z'){altKey=false;}
 switch(event.key ){
@@ -822,7 +905,7 @@ goForward[ci]=false;
 break;
 
 case 's': case 'ArrowDown':
-goBackward[ci]=false; 
+
 break;
 
 case 'a': case 'ArrowLeft':
@@ -887,6 +970,7 @@ var borderZoom=borderWidth*zoomRatioW;
 
 //for panning and zooming centered on the cursor
 function mouseWheeler(event){
+if(!scrollingHelp){
 delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
 if(delta>0||delta<0){
 if(delta>0){zoom=1.2;}else{zoom=.8;}
@@ -913,6 +997,7 @@ oldZoomW=zoomW;
 oldZoomH=zoomH;
 }//if delta !==0
 
+}//end if ! scrolling help
 }//end mouseWheeler
 
 document.body.ondblclick=function(){resetDefaultView();}
@@ -959,6 +1044,8 @@ oldy=event.clientY;
 function resetDefaultView(){
 ww=window.innerWidth;
 hh=window.innerHeight;
+el('tester').style.maxWidth=ww*.8+'px';
+el('tester').style.maxHeight=hh*.8+'px';
 zoomLeft=0;
 zoomTop=0;
 lefter=0;
@@ -983,6 +1070,9 @@ oldww=ww;
 oldhh=hh;
 ww=window.innerWidth;
 hh=window.innerHeight;
+
+el('tester').style.maxWidth=ww*.8+'px';
+el('tester').style.maxHeight=hh*.8+'px';
 
 el('canvid').width=ww;
 el('canvid').style.width=ww+'px';
@@ -1016,7 +1106,7 @@ setBorderDiv();
 
 oldZoomW=zoomW;
 oldZoomH=zoomH;
-}//end if ww!=innerWidth
+}//end if ww!=inner Width
 }//end detectBrowserZoom
 
 
@@ -1063,6 +1153,7 @@ if(j!=i&&!colliding[j]){
 if(cx <= car[j].position.x+carSize[j] && cx+carSize[i] >= car[j].position.x
 && cy+carSize[i] >= car[j].position.y && cy <= car[j].position.y+carSize[j]){
 colliding[i]=true; 
+score[i]--;
 return true;
 }//if overlapping
 }//end j!=ci
@@ -1100,6 +1191,8 @@ let by=bulletPos[d][b].y;
 if(bx <= car[c].position.x+carSize[c] && bx+bulletSize[d][b] >= car[c].position.x
 && by+bulletSize[d][b] >= car[c].position.y && by <= car[c].position.y+carSize[c]){
 colliding[c]=true; 
+score[c]--;
+score[d]++;
 resetBullet(d,b);
 return;
 }
@@ -1145,6 +1238,20 @@ car[f].angle=fixAngleRad(car[f].angle-bearDiff);
 
 }//end !almostColliding
 }//end auto target
+
+function scoreBoard(){
+if(showScore){
+da('scoreBlue', score[ei]); 
+da('scoreRed', score[ci]);
+}else{
+el('scoreBlue').style.display='none';
+el('scoreRed').style.display='none';
+}
+if(score[ci]>=5||score[ei]>=5){
+score=[0,0];
+keySwitcher('i');
+}
+}//end keep score
 
 
 el('canvid').focus();
