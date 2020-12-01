@@ -1,34 +1,34 @@
 <html>
 <head>
-<title>Self-Driving-Squares - No Physics</title>
+<title>Self-Driving-Squares - Game Version</title>
 <!--
 # Self-Driving-Squares
 
 November 15, 2020
-Live demo: http://drive.x10host.com/city/paths_no_physics.htm  
+Live demo: http://drive.x10host.com/city/selfDrivingSquares.htm  
   
-Tiny squares, which I refer to as cars, find their way along the streets in an image. You can also pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling the colors in the image. You can also control one of the squares with your arrow keys.  
-  
-I am using mrdoob's stats.js: for fps:  
-https://github.com/mrdoob/stats.js/  
-  
-I am also using images from:  
-https://www.dreamstime.com/stock-images-city-seamless-vector-wallpaper-image5056574  
-https://thumbs.dreamstime.com/b/city-seamless-vector-wallpaper-5056574.jpg  
-and  
-https://depositphotos.com/68246427/stock-illustration-minimal-city-map-for-gps.html  
-https://st2.depositphotos.com/4559651/6824/v/950/depositphotos_68246427-stock-illustration-minimal-city-map-for-gps.jpg  
-and  
-https://depositphotos.com/9519225/stock-illustration-seamless-background-of-abstract-city.html  
-https://static8.depositphotos.com/1303735/951/v/950/depositphotos_9519225-stock-illustration-seamless-background-of-abstract-city.jpg  
-and  
-https://www.google.com/maps/  
-  
-The images required some manual processing, to change the width/height ratio, and to remove the non-white pixels from the streets, for doing which I used Gimp.  
--->
-<!--
-<script src="matter.js"></script>
-<script src="matter-wrap.js"></script>
+Tiny squares, which I refer to as cars, find their way along the streets in an image. Pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling colors in the image. There are a few different street maps to try. In the game version, two squares, one red, one blue, shoot at each other, while also dodging squares. You can take control of the red square with your arrow keys.
+
+I am using mrdoob's stats.js: for fps:
+https://github.com/mrdoob/stats.js/
+
+I am using (in the non game version) the Matter.js 2d physics library for animation and rendering of the squares:
+https://brm.io/matter-js/
+https://github.com/liabru/matter-js
+
+I am also using images from:
+https://www.dreamstime.com/stock-images-city-seamless-vector-wallpaper-image5056574
+https://thumbs.dreamstime.com/b/city-seamless-vector-wallpaper-5056574.jpg
+and
+https://depositphotos.com/68246427/stock-illustration-minimal-city-map-for-gps.html
+https://st2.depositphotos.com/4559651/6824/v/950/depositphotos_68246427-stock-illustration-minimal-city-map-for-gps.jpg
+and
+https://depositphotos.com/9519225/stock-illustration-seamless-background-of-abstract-city.html
+https://static8.depositphotos.com/1303735/951/v/950/depositphotos_9519225-stock-illustration-seamless-background-of-abstract-city.jpg
+and
+https://www.google.com/maps/
+
+The images required some manual processing, to change the width/height ratio, and to make sure the white streets are pure white, and in come cases to mirror horizontally and vertically, for doing which I used Gimp.
 -->
 <style>
 .ui{
@@ -1026,6 +1026,7 @@ dragging=false;
 
 
 function panMousemover(event){ 
+if(!scrollingHelp){
 event.preventDefault();
 
 if(dragging){ 
@@ -1042,7 +1043,7 @@ el('borderDiv').style.top=zoomTop+topper-borderZoom+'px';
 oldx=event.clientX;
 oldy=event.clientY;
 
-}}//end mousemover
+}}}//end mousemover
 
 
 //reset to default view
