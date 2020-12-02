@@ -1,5 +1,6 @@
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <title>Self-Driving-Squares - Game Version</title>
 <!--
 # Self-Driving-Squares
@@ -48,7 +49,7 @@ background-color:#004705;
 </style>
 <script src="stats.js"></script>
 </head>
-<body id="bodid" style="overflow:hidden;background-color:#000000;zoom:1;">
+<body id="bodid" style="overflow:hidden;background-color:#ffffff;zoom:1;">
 
 <canvas id="canvid" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:1000;" ></canvas>
 <canvas id="canvasBG" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:900;visibility:hidden;display:none;"></canvas>
@@ -109,12 +110,23 @@ var paused=false;
 var numCars=50;
 var changingNumCars=false;
 var ctxScale=1;
+
+if(!isTouchScreen()){
 var ww=window.innerWidth;
+var hh=window.innerHeight;
+document.getElementsByTagName('meta')[0].content="width=device-width, initial-scale=1, user-scalable=yes";
+}else{
+document.getElementsByTagName('meta')[0].content="width=device-width, initial-scale=1, user-scalable=no";
+var ww=document.documentElement.clientWidth;
+var hh=document.documentElement.clientHeight;
+}
+
 var oldww=ww;
 var w_zoomRatio=ww/oldww;
-var hh=window.innerHeight;
 var oldhh=hh;
 var h_zoomRatio=hh/oldhh;
+
+
 
 el('tester').style.maxWidth=ww*.8+'px';
 el('tester').style.maxHeight=hh*.8+'px';
@@ -557,7 +569,6 @@ stats.end();
 }//end if !paused
 window.requestAnimationFrame(ticker);
  
-
 } //end ticker function
 
 
@@ -1005,37 +1016,66 @@ oldZoomH=zoomH;
 }//end if ! scrolling help
 }//end mouseWheeler
 
+
+
 document.body.ondblclick=function(){resetDefaultView();}
-document.body.onmousedown=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
 document.body.onmousewheel=function(){mouseWheeler(event);}
+
+if(!isTouchScreen()){
+document.body.onmousedown=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
 document.body.onmouseup=function(){panMouseupper(event);}
 document.body.onmousemove=function(){panMousemover(event);}
 
+}else if(isTouchScreen()){
+document.body.ontouchstart=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
+document.body.ontouchend=function(){panMouseupper(event);}
+document.body.ontouchmove=function(){panMousemover(event);}
+}
+
 function panMousedowner(event){
+if(!isTouchScreen()){
 event.preventDefault();
 if(event.which!=3){dragging=true;}
 oldx=event.clientX; 
 oldy=event.clientY; 
+
+}else if(isTouchScreen()){
+dragging=true;
+oldx=event.touches[0].clientX; 
+oldy=event.touches[0].clientY; 
+}//end is touchscreen
+
 }//end mousedowner
 
 
 function panMouseupper(event){
+if(!isTouchScreen()){
 event.preventDefault();
 dragging=false;
+
+}else if(isTouchScreen()){
+dragging=false;
+
+}//end is touchscreen
+
 }//end mouseupper
 
 
 function panMousemover(event){ 
+
 if(!scrollingHelp){
+if(dragging){ 
+
+if(!isTouchScreen()){
+
 event.preventDefault();
 
-if(dragging){ 
+
 lefter+=event.clientX-oldx;
 topper+=event.clientY-oldy;
 
 //canvasZoom
 drawZimg();
-
 
 el('borderDiv').style.left=zoomLeft+lefter-borderZoom+'px';
 el('borderDiv').style.top=zoomTop+topper-borderZoom+'px';
@@ -1043,15 +1083,45 @@ el('borderDiv').style.top=zoomTop+topper-borderZoom+'px';
 oldx=event.clientX;
 oldy=event.clientY;
 
-}}}//end mousemover
+
+
+}else if(isTouchScreen()){
+
+ 
+lefter+=event.touches[0].clientX-oldx;
+topper+=event.touches[0].clientY-oldy;
+
+//canvasZoom
+drawZimg();
+
+el('borderDiv').style.left=zoomLeft+lefter-borderZoom+'px';
+el('borderDiv').style.top=zoomTop+topper-borderZoom+'px';
+
+oldx=event.touches[0].clientX;
+oldy=event.touches[0].clientY;
+
+}//end is touchscreen
+
+}//end if dragging
+}//end !scrolling help
+
+}//end mousemover
 
 
 //reset to default view
 function resetDefaultView(){
+
+if(!isTouchScreen()){
 ww=window.innerWidth;
 hh=window.innerHeight;
+}else{
+ww=document.documentElement.clientWidth;
+hh=document.documentElement.clientHeight;
+}
+
 el('tester').style.maxWidth=ww*.8+'px';
 el('tester').style.maxHeight=hh*.8+'px';
+
 zoomLeft=0;
 zoomTop=0;
 lefter=0;
@@ -1060,6 +1130,7 @@ zoomW=ww;
 zoomH=hh;
 oldZoomW=zoomW;
 oldZoomH=zoomH;
+
 
 //canvasZoom
 drawZimg();
@@ -1070,12 +1141,26 @@ setBorderDiv();
 
 
 function detectBrowserZoom(){
-if(ww!=window.innerWidth || hh!=window.innerHeight){ 
+if(!isTouchScreen()){
+var newWW=window.innerWidth;
+var newHH=window.innerHeight;
+}else{
+var newWW=document.documentElement.clientWidth;
+var newHH=document.documentElement.clientHeight;
+}
+
+if(ww!=newWW || hh!=newHH){ 
 
 oldww=ww; 
 oldhh=hh;
+
+if(!isTouchScreen()){
 ww=window.innerWidth;
 hh=window.innerHeight;
+}else{
+ww=document.documentElement.clientWidth;
+hh=document.documentElement.clientHeight;
+}
 
 el('tester').style.maxWidth=ww*.8+'px';
 el('tester').style.maxHeight=hh*.8+'px';
@@ -1113,7 +1198,8 @@ setBorderDiv();
 oldZoomW=zoomW;
 oldZoomH=zoomH;
 }//end if ww!=inner Width
-}//end detectBrowserZoom
+}//end detect BrowserZoom
+
 
 
 //check if wider bounds than collision bounds are overlapping, w=range
@@ -1260,6 +1346,12 @@ score=[0,0];
 keySwitcher('i');
 }
 }//end keep score
+
+
+
+function isTouchScreen(){return 'ontouchstart' in document.documentElement;}
+
+//window.addEventListener('resize',resetDefaultView,false);
 
 
 el('canvid').focus();
