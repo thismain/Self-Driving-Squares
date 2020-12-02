@@ -127,7 +127,6 @@ var oldhh=hh;
 var h_zoomRatio=hh/oldhh;
 
 
-
 el('tester').style.maxWidth=ww*.8+'px';
 el('tester').style.maxHeight=hh*.8+'px';
 
@@ -202,6 +201,13 @@ setBorderDiv();
 
 var car=[];
 var carSize=[];
+
+var largeCarToScreenRatio=90;
+var smallCarToScreenRatio=156;
+var carMaxAccelToScreenRatio=460;
+var bulletToScreenRatio=225;
+var bulletAccelToScreenRatio=165;
+
 var ci=0;
 var ei=1;
 
@@ -253,12 +259,11 @@ var steerAngInc=.03;
 
 function setCarDefaults(){
 for(let i=0;i<numCars;i++){
-
-carSize[i]=7;
+carSize[i]=ww/smallCarToScreenRatio; 
 goForward[i]=true;
 goBackward[i]=false;
 reverseDir[i]=1;
-maxAccel[i]=1.8; 
+maxAccel[i]=ww/carMaxAccelToScreenRatio; 
 carVel[i]=maxAccel[i];
 
 steerLeft[i]=false;
@@ -301,12 +306,12 @@ fillStyle: random_rgba()//randHexColor()//randHexColor()
 //the controllable car
 car[ci].position.x=ww/2;
 car[ci].position.y=hh/2;
-carSize[ci]=10;
+carSize[ci]=ww/largeCarToScreenRatio; 
 car[ci].fillStyle='#000000';
 car[ci].altFill='#ff0000';
 
 //enemy car
-carSize[ei]=10;
+carSize[ei]=ww/largeCarToScreenRatio;
 car[ei].fillStyle='#000000';
 car[ei].altFill='#0000ff';
 }//end make cars
@@ -362,13 +367,15 @@ var bulletPos=[[],[]];
 var bulletFiring=[[],[]];
 
 
+
+
 function resetBullet(c,i){
 bulletFirePos[c][i]={x:0,y:0};
 bulletPos[c][i]={x:0,y:0};
-bulletSize[c][i]=4;
+bulletSize[c][i]=ww/bulletToScreenRatio;
 bulletAngle[c][i]=0;
 bulletSpeed[c][i]=carSize[ci]/2;
-bulletAccel[c][i]=4;
+bulletAccel[c][i]=ww/bulletAccelToScreenRatio;
 bulletFiring[c][i]=false;
 }//end resetBullets
 
@@ -717,7 +724,7 @@ document.body.addEventListener("keyup", keyupper);
 function displayHelp(){
 da('tester', 
 '&bull; left mouse button to pan<BR>'+
-'&bull; mouse wheel to zoom<BR>'+
+'&bull; mouse wheel to zoom (when this screen is closed)<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'m\')">m</span> key or double click to reset default view<BR>'+
 '&bull; middle mouse click to toggle fullscreen<BR>'+
 '&bull; arrow keys to control red flashing square<BR>'+
@@ -836,6 +843,7 @@ break;
 case ' ':
 break;
 case 'w': case 'ArrowUp':
+if(!userControlled){carFiring[ci]=false;}
 userControlled=true;
 goForward[ci]=true; 
 stopper=false;
@@ -843,6 +851,7 @@ if(carVel[ci]<0){carVel[ci]=0;}
 break;
 
 case 's': case 'ArrowDown':
+if(!userControlled){carFiring[ci]=false;}
 userControlled=true;
 goForward[ci]=false;
 stopper=true; 
@@ -850,11 +859,13 @@ if(carVel[ci]>0){carVel[ci]=-1;}
 break;
 
 case 'a': case 'ArrowLeft': 
+if(!userControlled){carFiring[ci]=false;}
 userControlled=true;
 steerLeft[ci]=true;  leftSteerAng[ci]=-steerAngInc; rightSteerAng[ci]=0;
 break;
 
 case 'd': case 'ArrowRight':
+if(!userControlled){carFiring[ci]=false;}
 userControlled=true;
 steerRight[ci]=true; rightSteerAng[ci]=steerAngInc; leftSteerAng[ci]=0;
 break;
@@ -986,7 +997,7 @@ var borderZoom=borderWidth*zoomRatioW;
 
 //for panning and zooming centered on the cursor
 function mouseWheeler(event){
-if(!scrollingHelp){
+if(!showHelp){
 delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
 if(delta>0||delta<0){
 if(delta>0){zoom=1.2;}else{zoom=.8;}
@@ -1033,6 +1044,9 @@ document.body.ontouchmove=function(){panMousemover(event);}
 }
 
 function panMousedowner(event){
+//let e;
+//if(!isTouchScreen()){e=event;}else{e=event.touches[0]}
+
 if(!isTouchScreen()){
 event.preventDefault();
 if(event.which!=3){dragging=true;}
@@ -1119,6 +1133,20 @@ ww=document.documentElement.clientWidth;
 hh=document.documentElement.clientHeight;
 }
 
+
+for(let b=0;b<numBullets;b++){
+bulletAccel[ci][b]=ww/bulletAccelToScreenRatio;
+bulletAccel[ei][b]=ww/bulletAccelToScreenRatio;
+bulletSize[ci][b]=ww/bulletToScreenRatio;
+bulletSize[ei][b]=ww/bulletToScreenRatio;
+}
+
+for(let i=0;i<numCars;i++){
+maxAccel[i]=ww/carMaxAccelToScreenRatio; 
+carSize[i]=ww/smallCarToScreenRatio;
+if(i==0||i==1){carSize[i]=ww/largeCarToScreenRatio;}
+}
+
 el('tester').style.maxWidth=ww*.8+'px';
 el('tester').style.maxHeight=hh*.8+'px';
 
@@ -1160,6 +1188,17 @@ hh=window.innerHeight;
 }else{
 ww=document.documentElement.clientWidth;
 hh=document.documentElement.clientHeight;
+}
+
+for(let b=0;b<numBullets;b++){
+bulletSize[ci][b]=ww/bulletToScreenRatio;
+bulletSize[ei][b]=ww/bulletToScreenRatio;
+}
+
+for(let i=0;i<numCars;i++){
+maxAccel[i]=ww/carMaxAccelToScreenRatio; 
+carSize[i]=ww/smallCarToScreenRatio;
+if(i==0||i==1){carSize[i]=ww/largeCarToScreenRatio;}
 }
 
 el('tester').style.maxWidth=ww*.8+'px';
