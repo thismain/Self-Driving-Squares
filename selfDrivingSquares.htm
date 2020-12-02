@@ -60,7 +60,7 @@ background-color:#004705;
 
 <div id="tester" style="opacity:.9;display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:30px;border:2px solid #ffffff;overflow:auto;max-height:600px;" onmouseover="scrollingHelp=true;" onmouseout="scrollingHelp=false;"></div>
 
-<div id="helpDiv" style="z-index:10000;position:absolute;top:4;left:4px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:16px;padding-top:0px;padding-bottom:0px;padding-right:6px;padding-left:6px;border:2px solid #ffffff;opacity:.3;cursor:pointer;" onmousedown="this.style.backgroundColor='#00ff00';showHelp=!showHelp;if(showHelp){displayHelp();}else{el('tester').style.display='none';}" onmouseup="this.style.backgroundColor='#000000';" onmouseover="this.style.backgroundColor='#00800f';" onmouseout="this.style.backgroundColor='#000000';"><b>?</b>
+<div id="helpDiv" style="width:24px;height:24px;z-index:10000;position:absolute;top:0;left:0px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:16px;border:2px solid #ffffff;opacity:.6;cursor:pointer;text-align:center;font-weight:bold;" onmousedown="this.style.backgroundColor='#00ff00';showHelp=!showHelp;if(showHelp){displayHelp();}else{el('tester').style.display='none';}" onmouseup="this.style.backgroundColor='#000000';" onmouseover="this.style.backgroundColor='#00800f';" onmouseout="this.style.backgroundColor='#000000';"><b>?</b>
 </div>
 
 
@@ -69,6 +69,9 @@ background-color:#004705;
 <div id="scoreBlue" style="z-index:1010;color:rgba(255,255,255,1);background-color:rgba(0,0,255,.5);border-radius:10px;width:40px;height:40px;top:0px;left:200px;position:absolute;border:5px solid rgba(255, 255, 255, .6);border-style:ridge;font-family:monospace;font-size:23px;text-align:center;line-height:40px;text-shadow: 2px 4px rgba(0,0,0,.95);font-weight:bold;"></div>
 
 <div id="scoreRed" style="z-index:1010;color:rgba(255,255,255,1);background-color:rgba(255,0,0,.5);border-radius:10px;width:40px;height:40px;top:0px;right:200px;position:absolute;border:5px solid rgba(255, 255, 255, .6);border-style:ridge;font-family:monospace;font-size:23px;text-align:center;line-height:40px;text-shadow: 2px 4px rgba(0,0,0,.95);font-weight:bold;"></div>
+
+
+
 
 <!--
 <div id="scoreBlue" style="opacity:.9;display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;"></div>
@@ -207,6 +210,15 @@ var smallCarToScreenRatio=156;
 var carMaxAccelToScreenRatio=460;
 var bulletToScreenRatio=225;
 var bulletAccelToScreenRatio=165;
+var scoreBoardSizeRatio=34;
+var scoreBoardPosRatio=6.8;
+var scoreBoardBorderRatio=218;
+var scoreBoardTextRatio=48;
+var scoreBoardBorderRadiusRatio=124;
+var scoreBoardTextShadowRatio=[683,342];
+var helpDivTextSizeRatio=68;
+var helpDivWidthRatio=57;
+var helpDivBorderRatio=683;
 
 var ci=0;
 var ei=1;
@@ -724,7 +736,7 @@ document.body.addEventListener("keyup", keyupper);
 function displayHelp(){
 da('tester', 
 '&bull; left mouse button to pan<BR>'+
-'&bull; mouse wheel to zoom (when this screen is closed)<BR>'+
+'&bull; mouse wheel to zoom<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'m\')">m</span> key or double click to reset default view<BR>'+
 '&bull; middle mouse click to toggle fullscreen<BR>'+
 '&bull; arrow keys to control red flashing square<BR>'+
@@ -1038,14 +1050,17 @@ document.body.onmouseup=function(){panMouseupper(event);}
 document.body.onmousemove=function(){panMousemover(event);}
 
 }else if(isTouchScreen()){
-document.body.ontouchstart=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
+document.body.ontouchstart=function(){panMousedowner(event);}
 document.body.ontouchend=function(){panMouseupper(event);}
 document.body.ontouchmove=function(){panMousemover(event);}
 }
 
+window.addEventListener('touchmove', e => {
+e.preventDefault();
+e.stopImmediatePropagation();
+}, { passive: false });
+
 function panMousedowner(event){
-//let e;
-//if(!isTouchScreen()){e=event;}else{e=event.touches[0]}
 
 if(!isTouchScreen()){
 event.preventDefault();
@@ -1076,45 +1091,22 @@ dragging=false;
 
 
 function panMousemover(event){ 
+let e;
+if(!isTouchScreen()){e=event;e.preventDefault();}else{e=event.touches[0]}
 
-if(!scrollingHelp){
-if(dragging){ 
+if(!showHelp){
+if(dragging){ 	
 
-if(!isTouchScreen()){
+lefter+=e.clientX-oldx;
+topper+=e.clientY-oldy;
 
-event.preventDefault();
-
-
-lefter+=event.clientX-oldx;
-topper+=event.clientY-oldy;
-
-//canvasZoom
 drawZimg();
 
 el('borderDiv').style.left=zoomLeft+lefter-borderZoom+'px';
 el('borderDiv').style.top=zoomTop+topper-borderZoom+'px';
 
-oldx=event.clientX;
-oldy=event.clientY;
-
-
-
-}else if(isTouchScreen()){
-
- 
-lefter+=event.touches[0].clientX-oldx;
-topper+=event.touches[0].clientY-oldy;
-
-//canvasZoom
-drawZimg();
-
-el('borderDiv').style.left=zoomLeft+lefter-borderZoom+'px';
-el('borderDiv').style.top=zoomTop+topper-borderZoom+'px';
-
-oldx=event.touches[0].clientX;
-oldy=event.touches[0].clientY;
-
-}//end is touchscreen
+oldx=e.clientX;
+oldy=e.clientY;
 
 }//end if dragging
 }//end !scrolling help
@@ -1133,19 +1125,7 @@ ww=document.documentElement.clientWidth;
 hh=document.documentElement.clientHeight;
 }
 
-
-for(let b=0;b<numBullets;b++){
-bulletAccel[ci][b]=ww/bulletAccelToScreenRatio;
-bulletAccel[ei][b]=ww/bulletAccelToScreenRatio;
-bulletSize[ci][b]=ww/bulletToScreenRatio;
-bulletSize[ei][b]=ww/bulletToScreenRatio;
-}
-
-for(let i=0;i<numCars;i++){
-maxAccel[i]=ww/carMaxAccelToScreenRatio; 
-carSize[i]=ww/smallCarToScreenRatio;
-if(i==0||i==1){carSize[i]=ww/largeCarToScreenRatio;}
-}
+setVarsRelativeToScreenWidth();
 
 el('tester').style.maxWidth=ww*.8+'px';
 el('tester').style.maxHeight=hh*.8+'px';
@@ -1190,16 +1170,7 @@ ww=document.documentElement.clientWidth;
 hh=document.documentElement.clientHeight;
 }
 
-for(let b=0;b<numBullets;b++){
-bulletSize[ci][b]=ww/bulletToScreenRatio;
-bulletSize[ei][b]=ww/bulletToScreenRatio;
-}
-
-for(let i=0;i<numCars;i++){
-maxAccel[i]=ww/carMaxAccelToScreenRatio; 
-carSize[i]=ww/smallCarToScreenRatio;
-if(i==0||i==1){carSize[i]=ww/largeCarToScreenRatio;}
-}
+setVarsRelativeToScreenWidth();
 
 el('tester').style.maxWidth=ww*.8+'px';
 el('tester').style.maxHeight=hh*.8+'px';
@@ -1240,6 +1211,48 @@ oldZoomH=zoomH;
 }//end detect BrowserZoom
 
 
+//set some variables relative to screen width
+function setVarsRelativeToScreenWidth(){
+el('scoreBlue').style.width=ww/scoreBoardSizeRatio+'px';
+el('scoreBlue').style.height=ww/scoreBoardSizeRatio+'px';
+el('scoreBlue').style.lineHeight=ww/scoreBoardSizeRatio+'px';
+el('scoreBlue').style.left=ww/scoreBoardPosRatio+'px';
+el('scoreBlue').style.border=ww/scoreBoardBorderRatio+'px solid rgba(255, 255, 255, .6)';
+el('scoreBlue').style.borderStyle='ridge';
+el('scoreBlue').style.borderRadius=ww/scoreBoardBorderRadiusRatio+'px';
+el('scoreBlue').style.fontSize=ww/scoreBoardTextRatio+'px';
+el('scoreBlue').style.textShadow=ww/scoreBoardTextShadowRatio[0]+'px '+ww/scoreBoardTextShadowRatio[1]+'px rgba(0,0,0,.95)';  
+
+el('scoreRed').style.width=ww/scoreBoardSizeRatio+'px';
+el('scoreRed').style.height=ww/scoreBoardSizeRatio+'px';
+el('scoreRed').style.lineHeight=ww/scoreBoardSizeRatio+'px';
+el('scoreRed').style.right=ww/scoreBoardPosRatio+'px';
+el('scoreRed').style.border=ww/scoreBoardBorderRatio+'px solid rgba(255, 255, 255, .6)';
+el('scoreRed').style.borderStyle='ridge';
+el('scoreRed').style.borderRadius=ww/scoreBoardBorderRadiusRatio+'px';
+el('scoreRed').style.fontSize=ww/scoreBoardTextRatio+'px';
+el('scoreRed').style.textShadow=ww/scoreBoardTextShadowRatio[0]+'px '+ww/scoreBoardTextShadowRatio[1]+'px rgba(0,0,0,.95)';
+
+el('helpDiv').style.fontSize=ww/helpDivTextSizeRatio+'px';
+el('helpDiv').style.width=ww/helpDivWidthRatio+'px';
+el('helpDiv').style.height=ww/helpDivWidthRatio+'px';
+el('helpDiv').style.border=ww/helpDivBorderRatio+'px solid #ffffff';
+
+for(let b=0;b<numBullets;b++){
+bulletAccel[ci][b]=ww/bulletAccelToScreenRatio;
+bulletAccel[ei][b]=ww/bulletAccelToScreenRatio;
+bulletSize[ci][b]=ww/bulletToScreenRatio;
+bulletSize[ei][b]=ww/bulletToScreenRatio;
+}
+
+for(let i=0;i<numCars;i++){
+maxAccel[i]=ww/carMaxAccelToScreenRatio; 
+carSize[i]=ww/smallCarToScreenRatio;
+if(i==0||i==1){carSize[i]=ww/largeCarToScreenRatio;}
+}
+}//end set Vars relative to screen width
+
+setVarsRelativeToScreenWidth();
 
 //check if wider bounds than collision bounds are overlapping, w=range
 function collisionAlmostOccurring(i,r){
