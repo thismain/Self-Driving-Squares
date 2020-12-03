@@ -6,16 +6,11 @@
 # Self-Driving-Squares
 
 November 15, 2020
-Live demo: http://drive.x10host.com/city/selfDrivingSquares.htm  
   
 Tiny squares, which I refer to as cars, find their way along the streets in an image. Pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling colors in the image. There are a few different street maps to try. In the game version, two squares, one red, one blue, shoot at each other, while also dodging squares. You can take control of the red square with your arrow keys.
 
 I am using mrdoob's stats.js: for fps:
 https://github.com/mrdoob/stats.js/
-
-I am using (in the non game version) the Matter.js 2d physics library for animation and rendering of the squares:
-https://brm.io/matter-js/
-https://github.com/liabru/matter-js
 
 I am also using images from:
 https://www.dreamstime.com/stock-images-city-seamless-vector-wallpaper-image5056574
@@ -29,7 +24,11 @@ https://static8.depositphotos.com/1303735/951/v/950/depositphotos_9519225-stock-
 and
 https://www.google.com/maps/
 
-The images required some manual processing, to change the width/height ratio, and to make sure the white streets are pure white, and in come cases to mirror horizontally and vertically, for doing which I used Gimp.
+The images required some manual processing, to change the width/height ratio, and to make sure the white streets are pure white, and in come cases to mirror horizontally and vertically, for doing which I used Gimp.  
+  
+I am using (in the physics, non-game version) the Matter.js 2d physics library for animation and rendering of the squares:
+https://brm.io/matter-js/
+https://github.com/liabru/matter-js
 -->
 <style>
 .ui{
@@ -68,7 +67,7 @@ background-color:#004705;
 
 <div id="scoreRed" style="z-index:1010;color:rgba(255,255,255,1);background-color:rgba(255,0,0,.5);border-radius:10px;width:40px;height:40px;top:0px;right:200px;position:absolute;border:5px solid rgba(255, 255, 255, .6);border-style:ridge;font-family:monospace;font-size:23px;text-align:center;line-height:40px;text-shadow: 2px 4px rgba(0,0,0,.95);font-weight:bold;"></div>
 
-<div id="steeringDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:20px;width:110;height:30px;bottom:0px;left:100px;position:absolute;font-family:monospace;font-size:40px;text-align:center;line-height:30px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;">&#129068; &#129070;</div>
+<div id="steeringDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:20px;width:110;height:34px;bottom:0px;left:100px;position:absolute;font-family:monospace;font-size:40px;text-align:center;line-height:34px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;">&#129068; &#129070;</div>
 
 
 <div id="fireDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:20px;width:40;height:40px;bottom:0px;right:100px;position:absolute;font-family:monospace;font-size:50px;text-align:center;line-height:32px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;">&#9678;</div>
@@ -788,6 +787,8 @@ carFiring[ei]=true;
 }
 break;
 case 'Shift':
+if(!userControlled){carFiring[ci]=false;fireCounter[ci]=0;}
+userControlled=true;
 if(!colliding[ci]){ 
 carFiring[ci]=true;
 }
