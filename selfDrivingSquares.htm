@@ -68,10 +68,10 @@ background-color:#004705;
 
 <div id="scoreRed" style="z-index:1010;color:rgba(255,255,255,1);background-color:rgba(255,0,0,.5);border-radius:10px;width:40px;height:40px;top:0px;right:200px;position:absolute;border:5px solid rgba(255, 255, 255, .6);border-style:ridge;font-family:monospace;font-size:23px;text-align:center;line-height:40px;text-shadow: 2px 4px rgba(0,0,0,.95);font-weight:bold;"></div>
 
-<div id="steeringDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:10px;width:130;height:30px;bottom:0px;left:100px;position:absolute;border:5px solid rgba(255, 255, 255, .8);border-style:ridge;font-family:monospace;font-size:30px;text-align:center;line-height:30px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;"> < | > </div>
+<div id="steeringDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:20px;width:110;height:30px;bottom:0px;left:100px;position:absolute;font-family:monospace;font-size:40px;text-align:center;line-height:30px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;">&#129068; &#129070;</div>
 
 
-<div id="fireDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:10px;width:80;height:30px;bottom:0px;right:100px;position:absolute;border:5px solid rgba(255, 255, 255, .8	);border-style:ridge;font-family:monospace;font-size:30px;text-align:center;line-height:30px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;">>x<</div>
+<div id="fireDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:20px;width:40;height:40px;bottom:0px;right:100px;position:absolute;font-family:monospace;font-size:50px;text-align:center;line-height:32px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;">&#9678;</div>
 
 </body>
 </html>
@@ -584,6 +584,7 @@ stats.end();
 }//end if !paused
 window.requestAnimationFrame(ticker);
  
+
 } //end ticker function
 
 
@@ -859,7 +860,7 @@ break;
 case ' ':
 break;
 case 'w': case 'ArrowUp':
-if(!userControlled){carFiring[ci]=false;}
+if(!userControlled){carFiring[ci]=false;fireCounter[ci]=0;}
 userControlled=true;
 goForward[ci]=true; 
 stopper=false;
@@ -867,7 +868,7 @@ if(carVel[ci]<0){carVel[ci]=0;}
 break;
 
 case 's': case 'ArrowDown':
-if(!userControlled){carFiring[ci]=false;}
+if(!userControlled){carFiring[ci]=false;fireCounter[ci]=0;}
 userControlled=true;
 goForward[ci]=false;
 stopper=true; 
@@ -875,13 +876,13 @@ if(carVel[ci]>0){carVel[ci]=-1;}
 break;
 
 case 'a': case 'ArrowLeft': 
-if(!userControlled){carFiring[ci]=false;}
+if(!userControlled){carFiring[ci]=false;fireCounter[ci]=0;}
 userControlled=true;
 steerLeft[ci]=true;  leftSteerAng[ci]=-steerAngInc; rightSteerAng[ci]=0;
 break;
 
 case 'd': case 'ArrowRight':
-if(!userControlled){carFiring[ci]=false;}
+if(!userControlled){carFiring[ci]=false;fireCounter[ci]=0;}
 userControlled=true;
 steerRight[ci]=true; rightSteerAng[ci]=steerAngInc; leftSteerAng[ci]=0;
 break;
@@ -1408,7 +1409,7 @@ touchDriving=true;
 let e;
 if(!isTouchScreen()){e=event;}else{e=event.touches[0];}
 let xt=e.clientX; 
-if(xt<=165){keySwitcher('ArrowLeft');}else{keySwitcher('ArrowRight');}
+if(xt<=155){keySwitcher('ArrowLeft');}else{keySwitcher('ArrowRight');}
 xtOld=xt;
 }//end touch steering start
 
@@ -1422,7 +1423,7 @@ function touchSteeringMove(event){
 let e;
 if(!isTouchScreen()){e=event;}else{e=event.touches[0];}
 let xt=e.clientX; 
-if(xt>=165){
+if(xt>=155){
 keySwitcher('ArrowRight');
 }else{
 keySwitcher('ArrowLeft');
