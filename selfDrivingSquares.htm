@@ -1058,9 +1058,9 @@ document.body.onmouseup=function(){panMouseupper(event);}
 document.body.onmousemove=function(){panMousemover(event);}
 
 }else if(isTouchScreen()){
-//document.body.ontouchstart=function(){panMousedowner(event);}
-//document.body.ontouchend=function(){panMouseupper(event);}
-//document.body.ontouchmove=function(){panMousemover(event);}
+document.body.ontouchstart=function(){panMousedowner(event);}
+document.body.ontouchend=function(){panMouseupper(event);}
+document.body.ontouchmove=function(){panMousemover(event);}
 }
 
 window.addEventListener('touchmove', e => {
