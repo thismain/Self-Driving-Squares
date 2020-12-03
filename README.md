@@ -20,6 +20,7 @@ Here are the shortcut keys:
 <li><strong>u</strong> key to toggle war game</li>
           game points: 5 wins; hit=1; get hit=-1; collide=-1</li> 
 <li><strong>j</strong> key to show score</li>
+<li><strong>t</strong> key to show touchscreen steering and fire controls</li>
 <li><strong>n</strong> key to start new game</li>
 <li><strong>v</strong> key to add 5 cars </li>
 <li><strong>c</strong> key to remove 5 cars</li>
