@@ -64,20 +64,14 @@ background-color:#004705;
 </div>
 
 
-
-
 <div id="scoreBlue" style="z-index:1010;color:rgba(255,255,255,1);background-color:rgba(0,0,255,.5);border-radius:10px;width:40px;height:40px;top:0px;left:200px;position:absolute;border:5px solid rgba(255, 255, 255, .6);border-style:ridge;font-family:monospace;font-size:23px;text-align:center;line-height:40px;text-shadow: 2px 4px rgba(0,0,0,.95);font-weight:bold;"></div>
 
 <div id="scoreRed" style="z-index:1010;color:rgba(255,255,255,1);background-color:rgba(255,0,0,.5);border-radius:10px;width:40px;height:40px;top:0px;right:200px;position:absolute;border:5px solid rgba(255, 255, 255, .6);border-style:ridge;font-family:monospace;font-size:23px;text-align:center;line-height:40px;text-shadow: 2px 4px rgba(0,0,0,.95);font-weight:bold;"></div>
 
+<div id="steeringDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:10px;width:130;height:30px;bottom:0px;left:100px;position:absolute;border:5px solid rgba(255, 255, 255, .8);border-style:ridge;font-family:monospace;font-size:30px;text-align:center;line-height:30px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;"> < | > </div>
 
 
-
-<!--
-<div id="scoreBlue" style="opacity:.9;display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;"></div>
-
-<div id="scoreRed" style="z-index:10000;color:rgba(255,0,0,1);backgroundColor:rgba(255,0,0,.5);border-radius:10px;width:60px;height:60px;top:50px;right:50px;position;absolute;border:3px solid rgba(255, 0, 0, .5);border-style:ridge;font-family:arial;font-size:26px;"></div>
--->
+<div id="fireDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:10px;width:80;height:30px;bottom:0px;right:100px;position:absolute;border:5px solid rgba(255, 255, 255, .8	);border-style:ridge;font-family:monospace;font-size:30px;text-align:center;line-height:30px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;">>x<</div>
 
 </body>
 </html>
@@ -108,7 +102,8 @@ var ii=imageFiles.length-1;
 var roadR=[255,255,255,255,255,255,255];
 var zoomer=false;
 var paused=false;
-
+var touchDriving=false;
+var showSteeringFireDivs=false;
 
 var numCars=50;
 var changingNumCars=false;
@@ -746,9 +741,10 @@ da('tester',
 '&bull; <span class="ui" onmousedown="keySwitcher(\'u\')">u</span> key to toggle war game<BR>'+
 '&nbsp;&nbsp;&nbsp;&nbsp; game points: 5 wins; hit=1; get hit=-1; collide=-1<BR>'+ 
 '&bull; <span class="ui" onmousedown="keySwitcher(\'j\')">j</span> key to show score<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'t\')">t</span> key to show the steering and fire controls<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'n\')">n</span> key to start new game<BR>'+
-'&bull; <span class="ui" onmousedown="keySwitcher(\'v\')">v</span> key to add 50 cars to: <input type="text" id="numcars" style="width:100px;border:none;background-color:#000000;display:inline-block;white-space: nowrap;color:#00ff00;font-size:18px;" value="'+numCars+'"></input><BR>'+
-'&bull; <span class="ui" onmousedown="keySwitcher(\'c\')">c</span> key to remove 50 cars<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'v\')">v</span> key to add 5 cars to: <input type="text" id="numcars" style="width:100px;border:none;background-color:#000000;display:inline-block;white-space: nowrap;color:#00ff00;font-size:18px;" value="'+numCars+'"></input><BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'c\')">c</span> key to remove 5 cars<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'i\')">i</span> key to load a new street map<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'p\')">p</span> key to pause/resume<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'k\')">k</span> key to set random car positions<BR>'+
@@ -826,23 +822,30 @@ if(showHelp){ displayHelp();
 break;
 case 'v': 
 changingNumCars=true;
-numCars+=50; if(showHelp){el('numcars').value=numCars;}
+numCars+=5; if(showHelp){el('numcars').value=numCars;}
 initCars();
 changingNumCars=false;
 break;
 case 'c': 
 changingNumCars=true;
-if(numCars>50){
-numCars-=50; if(showHelp){el('numcars').value=numCars;}
+if(numCars>5){
+numCars-=5; if(showHelp){el('numcars').value=numCars;}
 initCars();
 }
 changingNumCars=false;
 break;
 case 't':
-for(let i=0;i<numCars;i++){if(i!=ci){carVel[i]=maxAccel[i]=0;}}
+showSteeringFireDivs=!showSteeringFireDivs;
+if(!showSteeringFireDivs){
+el('steeringDiv').style.display='none';
+el('fireDiv').style.display='none';
+}else{
+el('steeringDiv').style.display='block';
+el('fireDiv').style.display='block';
+}
 break;
 case 'g':
-for(let i=0;i<numCars;i++){if(i!=ci){carVel[i]=maxAccel[i]=1.8;}}
+
 break;
 
 case 'q':
@@ -1091,8 +1094,9 @@ dragging=false;
 
 
 function panMousemover(event){ 
+if(!touchDriving){
 let e;
-if(!isTouchScreen()){e=event;e.preventDefault();}else{e=event.touches[0]}
+if(!isTouchScreen()){e=event;e.preventDefault();}else{e=event.touches[0];}
 
 if(!showHelp){
 if(dragging){ 	
@@ -1111,6 +1115,7 @@ oldy=e.clientY;
 }//end if dragging
 }//end !scrolling help
 
+}//end if ! touchDriving
 }//end mousemover
 
 
@@ -1210,28 +1215,24 @@ oldZoomH=zoomH;
 }//end if ww!=inner Width
 }//end detect BrowserZoom
 
+function setScoreBoardVars(rb){
+rb.style.width=ww/scoreBoardSizeRatio+'px';
+rb.style.height=ww/scoreBoardSizeRatio+'px';
+rb.style.lineHeight=ww/scoreBoardSizeRatio+'px';
+rb.style.border=ww/scoreBoardBorderRatio+'px solid rgba(255, 255, 255, .6)';
+rb.style.borderStyle='ridge';
+rb.style.borderRadius=ww/scoreBoardBorderRadiusRatio+'px';
+rb.style.fontSize=ww/scoreBoardTextRatio+'px';
+rb.style.textShadow=ww/scoreBoardTextShadowRatio[0]+'px '+ww/scoreBoardTextShadowRatio[1]+'px rgba(0,0,0,.95)';  
+}
+
 
 //set some variables relative to screen width
 function setVarsRelativeToScreenWidth(){
-el('scoreBlue').style.width=ww/scoreBoardSizeRatio+'px';
-el('scoreBlue').style.height=ww/scoreBoardSizeRatio+'px';
-el('scoreBlue').style.lineHeight=ww/scoreBoardSizeRatio+'px';
+setScoreBoardVars(el('scoreBlue'));
+setScoreBoardVars(el('scoreRed'));
 el('scoreBlue').style.left=ww/scoreBoardPosRatio+'px';
-el('scoreBlue').style.border=ww/scoreBoardBorderRatio+'px solid rgba(255, 255, 255, .6)';
-el('scoreBlue').style.borderStyle='ridge';
-el('scoreBlue').style.borderRadius=ww/scoreBoardBorderRadiusRatio+'px';
-el('scoreBlue').style.fontSize=ww/scoreBoardTextRatio+'px';
-el('scoreBlue').style.textShadow=ww/scoreBoardTextShadowRatio[0]+'px '+ww/scoreBoardTextShadowRatio[1]+'px rgba(0,0,0,.95)';  
-
-el('scoreRed').style.width=ww/scoreBoardSizeRatio+'px';
-el('scoreRed').style.height=ww/scoreBoardSizeRatio+'px';
-el('scoreRed').style.lineHeight=ww/scoreBoardSizeRatio+'px';
 el('scoreRed').style.right=ww/scoreBoardPosRatio+'px';
-el('scoreRed').style.border=ww/scoreBoardBorderRatio+'px solid rgba(255, 255, 255, .6)';
-el('scoreRed').style.borderStyle='ridge';
-el('scoreRed').style.borderRadius=ww/scoreBoardBorderRadiusRatio+'px';
-el('scoreRed').style.fontSize=ww/scoreBoardTextRatio+'px';
-el('scoreRed').style.textShadow=ww/scoreBoardTextShadowRatio[0]+'px '+ww/scoreBoardTextShadowRatio[1]+'px rgba(0,0,0,.95)';
 
 el('helpDiv').style.fontSize=ww/helpDivTextSizeRatio+'px';
 el('helpDiv').style.width=ww/helpDivWidthRatio+'px';
@@ -1399,11 +1400,69 @@ keySwitcher('i');
 }
 }//end keep score
 
-
-
 function isTouchScreen(){return 'ontouchstart' in document.documentElement;}
 
-//window.addEventListener('resize',resetDefaultView,false);
+function touchSteeringStart(event){
+touchDriving=true;
+let e;
+if(!isTouchScreen()){e=event;}else{e=event.touches[0];}
+let xt=e.clientX; 
+if(xt<=165){keySwitcher('ArrowLeft');}else{keySwitcher('ArrowRight');}
+xtOld=xt;
+}//end touch steering start
+
+function touchSteeringEnd(){
+steerLeft[ci]=false;leftSteerAng[ci]=0;
+steerRight[ci]=false;rightSteerAng[ci]=0;
+touchDriving=false;
+}//end touch steering end
+
+function touchSteeringMove(event){
+let e;
+if(!isTouchScreen()){e=event;}else{e=event.touches[0];}
+let xt=e.clientX; 
+if(xt>=165){
+keySwitcher('ArrowRight');
+}else{
+keySwitcher('ArrowLeft');
+}
+}//end touch Steering Move
+
+function touchFireStart(event){
+touchDriving=true;
+keySwitcher('Shift');
+}//end touch fire start
+
+function touchFireEnd(event){
+touchDriving=false;
+keySwitcher('Shift');
+fireLock[ci]=false;
+fireCounter[ci]=0;
+carFiring[ci]=false;
+}//end touch fire end
+
+if(isTouchScreen()){
+showSteeringFireDivs=true;
+
+el('steeringDiv').ontouchmove=function(){touchSteeringMove(event);}
+el('steeringDiv').ontouchstart=function(){touchSteeringStart(event);}
+el('steeringDiv').ontouchend=function(){touchSteeringEnd();}
+
+el('fireDiv').ontouchstart=function(){touchFireStart(event);}
+el('fireDiv').ontouchend=function(){touchFireEnd(event);}
+
+el('steeringDiv').style.display='block';
+el('fireDiv').style.display='block';
+
+}else if(!isTouchScreen()){
+el('steeringDiv').style.cursor='pointer';
+el('steeringDiv').onmousedown=function(){touchSteeringStart(event);}
+el('steeringDiv').onmouseup=function(){touchSteeringEnd();}
+
+el('fireDiv').style.cursor='pointer';
+el('fireDiv').onmousedown=function(){touchFireStart(event);}
+el('fireDiv').onmouseup=function(){touchFireEnd();} 
+}//end if ! is touch screen
 
 
 el('canvid').focus();
