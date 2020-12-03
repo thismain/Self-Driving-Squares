@@ -1016,7 +1016,7 @@ var borderZoom=borderWidth*zoomRatioW;
 
 //for panning and zooming centered on the cursor
 function mouseWheeler(event){
-if(!showHelp){
+if((isTouchScreen()&&!showHelp)||(!isTouchScreen()&&!scrollingHelp)){
 delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
 if(delta>0||delta<0){
 if(delta>0){zoom=1.2;}else{zoom=.8;}
@@ -1049,7 +1049,7 @@ oldZoomH=zoomH;
 
 
 document.body.ondblclick=function(){resetDefaultView();}
-document.body.onmousewheel=function(){mouseWheeler(event);}
+document.body.onwheel=function(){mouseWheeler(event);}
 
 if(!isTouchScreen()){
 document.body.onmousedown=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
@@ -1102,7 +1102,7 @@ if(!touchDriving){
 let e;
 if(!isTouchScreen()){e=event;e.preventDefault();}else{e=event.touches[0];}
 
-if(!showHelp){
+if((isTouchScreen()&&!showHelp)||(!isTouchScreen()&&!scrollingHelp)){
 if(dragging){ 	
 
 lefter+=e.clientX-oldx;
