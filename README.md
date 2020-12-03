@@ -21,8 +21,8 @@ Here are the shortcut keys:
           game points: 5 wins; hit=1; get hit=-1; collide=-1</li> 
 <li><strong>j</strong> key to show score</li>
 <li><strong>n</strong> key to start new game</li>
-<li><strong>v</strong> key to add 50 cars </li>
-<li><strong>c</strong> key to remove 50 cars</li>
+<li><strong>v</strong> key to add 5 cars </li>
+<li><strong>c</strong> key to remove 5 cars</li>
 <li><strong>i</strong> key to load a new street map</li>
 <li><strong>p</strong> key to pause/resume</li>
 <li><strong>k</strong> key to set random car positions</li>
