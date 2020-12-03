@@ -26,7 +26,7 @@ Here are the shortcut keys:
 <li><strong>p</strong> key to pause/resume</li>
 <li><strong>k</strong> key to set random car positions</li>
 <li><strong>f</strong> key to show fps, click for ms, memory usage</li>
-<li><strong>q</strong> key to hide the question mark</li>
+<li><strong>q</strong> key to hide the help icon</li>
 <li><strong>h</strong> key to toggle this help screen</li>
 </ul>
   
