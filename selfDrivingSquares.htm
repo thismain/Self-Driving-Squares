@@ -1,6 +1,6 @@
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width,  initial-scale=1, user-scalable=no">
 <title>Self Driving Squares</title>
 <!--
 # Self-Driving-Squares
@@ -59,7 +59,7 @@ background-color:#004705;
 
 <div id="tester" style="opacity:.9;display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:30px;border:2px solid #ffffff;overflow:auto;max-height:600px;" onmouseover="scrollingHelp=true;" onmouseout="scrollingHelp=false;"></div>
 
-<div id="helpDiv" style="width:24px;height:24px;z-index:10000;position:absolute;top:0;left:0px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:16px;border:2px solid #ffffff;opacity:.6;cursor:pointer;text-align:center;font-weight:bold;" onmousedown="this.style.backgroundColor='#00ff00';showHelp=!showHelp;if(showHelp){displayHelp();}else{el('tester').style.display='none';}" onmouseup="this.style.backgroundColor='#000000';" onmouseover="this.style.backgroundColor='#00800f';" onmouseout="this.style.backgroundColor='#000000';"><b>&#8801;</b>
+<div id="helpDiv" style="width:24px;height:24px;z-index:10000;position:absolute;top:0;left:0px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:16px;border:2px solid #ffffff;opacity:.5;cursor:pointer;text-align:center;font-weight:bold;line-height:22px;" onmousedown="this.style.backgroundColor='#00ff00';showHelp=!showHelp;if(showHelp){displayHelp();}else{el('tester').style.display='none';}" onmouseup="this.style.backgroundColor='#000000';" onmouseover="this.style.backgroundColor='#00800f';" onmouseout="this.style.backgroundColor='#000000';"><b>&#8801;</b>
 </div>
 
 
@@ -204,7 +204,7 @@ var largeCarToScreenRatio=90;
 var smallCarToScreenRatio=156;
 var carMaxAccelToScreenRatio=460;
 var bulletToScreenRatio=225;
-var bulletAccelToScreenRatio=165;
+var bulletAccelToScreenRatio=170;
 var scoreBoardSizeRatio=34;
 var scoreBoardWidthRatio=24;
 var scoreBoardPosRatio=6.8;
@@ -215,6 +215,7 @@ var scoreBoardTextShadowRatio=[683,342];
 var helpDivTextSizeRatio=68;
 var helpDivWidthRatio=57;
 var helpDivBorderRatio=683;
+var helpDivLineHeightRatio=62;
 
 var ci=0;
 var ei=1;
@@ -1057,9 +1058,9 @@ document.body.onmouseup=function(){panMouseupper(event);}
 document.body.onmousemove=function(){panMousemover(event);}
 
 }else if(isTouchScreen()){
-document.body.ontouchstart=function(){panMousedowner(event);}
-document.body.ontouchend=function(){panMouseupper(event);}
-document.body.ontouchmove=function(){panMousemover(event);}
+//document.body.ontouchstart=function(){panMousedowner(event);}
+//document.body.ontouchend=function(){panMouseupper(event);}
+//document.body.ontouchmove=function(){panMousemover(event);}
 }
 
 window.addEventListener('touchmove', e => {
@@ -1242,6 +1243,7 @@ el('helpDiv').style.fontSize=ww/helpDivTextSizeRatio+'px';
 el('helpDiv').style.width=ww/helpDivWidthRatio+'px';
 el('helpDiv').style.height=ww/helpDivWidthRatio+'px';
 el('helpDiv').style.border=ww/helpDivBorderRatio+'px solid #ffffff';
+el('helpDiv').style.lineHeight=ww/helpDivLineHeightRatio+'px';
 
 for(let b=0;b<numBullets;b++){
 bulletAccel[ci][b]=ww/bulletAccelToScreenRatio;
