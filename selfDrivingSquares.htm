@@ -49,11 +49,11 @@ background-color:#004705;
 </style>
 <script src="stats.js"></script>
 </head>
-<body id="bodid" style="overflow:hidden;background-color:#ffffff;zoom:1;">
+<body id="bodid" style="overflow:hidden;background-color:#000000;zoom:1;">
 
 <canvas id="canvid" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:1000;" ></canvas>
 <canvas id="canvasBG" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:900;visibility:hidden;display:none;"></canvas>
-<canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;"></canvas>
+<canvas id="canvasZoom" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:910;background-color:#000000"></canvas>
 <div id="borderDiv" style="visibility:visible;z-index:1005;position:absolute;width:1px;height:1px;left:-10px;top:-10px;" ></div>
 
 <div id="loadingStreetMap" style="opacity:.9;display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:12px;border:2px solid #ffffff;"></div>
@@ -152,6 +152,7 @@ bImg.onload=function(){
 setBimg();
 setZimg();
 drawZimg();
+document.body.backgroundColor='#ffffff';
 el('loadingStreetMap').style.display='none';
 }//end bImg onload
 
