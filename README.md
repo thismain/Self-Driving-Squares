@@ -1,7 +1,8 @@
 # Self-Driving-Squares
 
 November 15, 2020  
-Game Version demo (no physics): http://drive.x10host.com/city/selfDrivingSquares.htm  
+  
+Demo: http://drive.x10host.com/city/selfDrivingSquares.htm  
 [![screenshot](https://github.com/thismain/Self-Driving-Squares/blob/main/screenshotter.png?raw=true)](http://drive.x10host.com/city/selfDrivingSquares.htm)  
   
 Tiny squares, which I refer to as cars, find their way along the streets in an image. Pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling colors in the image. There are a few different street maps to try. In the game version, two squares, one red, one blue, shoot at each other, while also dodging squares. You can take control of the red square with your arrow keys.  
