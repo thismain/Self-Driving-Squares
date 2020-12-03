@@ -59,7 +59,7 @@ background-color:#004705;
 
 <div id="tester" style="opacity:.9;display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:20px;padding:30px;border:2px solid #ffffff;overflow:auto;max-height:600px;" onmouseover="scrollingHelp=true;" onmouseout="scrollingHelp=false;"></div>
 
-<div id="helpDiv" style="width:24px;height:24px;z-index:10000;position:absolute;top:0;left:0px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:16px;border:2px solid #ffffff;opacity:.6;cursor:pointer;text-align:center;font-weight:bold;" onmousedown="this.style.backgroundColor='#00ff00';showHelp=!showHelp;if(showHelp){displayHelp();}else{el('tester').style.display='none';}" onmouseup="this.style.backgroundColor='#000000';" onmouseover="this.style.backgroundColor='#00800f';" onmouseout="this.style.backgroundColor='#000000';"><b>?</b>
+<div id="helpDiv" style="width:24px;height:24px;z-index:10000;position:absolute;top:0;left:0px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:16px;border:2px solid #ffffff;opacity:.6;cursor:pointer;text-align:center;font-weight:bold;" onmousedown="this.style.backgroundColor='#00ff00';showHelp=!showHelp;if(showHelp){displayHelp();}else{el('tester').style.display='none';}" onmouseup="this.style.backgroundColor='#000000';" onmouseover="this.style.backgroundColor='#00800f';" onmouseout="this.style.backgroundColor='#000000';"><b>&#8801;</b>
 </div>
 
 
@@ -751,9 +751,9 @@ da('tester',
 '&bull; <span class="ui" onmousedown="keySwitcher(\'p\')">p</span> key to pause/resume<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'k\')">k</span> key to set random car positions<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'f\')">f</span> key to show fps, click for ms, memory usage<BR>'+
-'&bull; <span class="ui" onmousedown="keySwitcher(\'q\')">q</span> key to hide the question mark<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'q\')">q</span> key to hide the help icon<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'h\')">h</span> key to toggle this help screen<BR>'+
-'&bull; <a target="_blank" href="https://github.com/thismain/Self-Driving-Squares">files on github</a><span style="cursor:pointer;display:inline-block;z-index:100001;position:absolute;top:0px;right:0px;font-size:18px;color:#cdcdcd;border:1px solid #cdcdcd;width:20px;margin:8px;padding:2px;font-weight:bold;font-family:arial;text-align:center;" onmousedown="showHelp=false;el(\'tester\').style.display=\'none\';">X</span>'
+'&bull; <a target="_blank" href="https://github.com/thismain/Self-Driving-Squares">files on github</a><span style="cursor:pointer;display:inline-block;z-index:100001;position:absolute;top:0px;right:0px;font-size:18px;color:#cdcdcd;border:1px solid #555555;width:20px;margin:8px;padding:2px;font-weight:bold;font-family:arial;text-align:center;" onmousedown="showHelp=false;el(\'tester\').style.display=\'none\';">X</span>'
 );
 }//end displayHelp
 
