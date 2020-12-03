@@ -6,7 +6,9 @@
 # Self-Driving-Squares
 
 November 15, 2020
-  
+
+Intended for use with a keyboard and mouse with scroll wheel as the input devices, rather than a touchscreen. 
+
 Tiny squares, which I refer to as cars, find their way along the streets in an image. Pan and zoom the world using your left mouse button and wheel. The cars find their way by sampling colors in the image. There are a few different street maps to try. In the game version, two squares, one red, one blue, shoot at each other, while also dodging squares. You can take control of the red square with your arrow keys.
 
 I am using mrdoob's stats.js: for fps:
@@ -48,7 +50,7 @@ background-color:#004705;
 </style>
 <script src="stats.js"></script>
 </head>
-<body id="bodid" style="overflow:hidden;background-color:#000000;zoom:1;">
+<body id="bodid" style="overflow:hidden;background-color:#000000;">
 
 <canvas id="canvid" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:1000;" ></canvas>
 <canvas id="canvasBG" width="20" height="20" style="position:absolute;left:0px;top:0px;z-index:900;visibility:hidden;display:none;"></canvas>
@@ -1048,9 +1050,9 @@ oldZoomH=zoomH;
 }//end mouseWheeler
 
 
-
 document.body.ondblclick=function(){resetDefaultView();}
 document.body.onwheel=function(){mouseWheeler(event);}
+
 
 if(!isTouchScreen()){
 document.body.onmousedown=function(){panMousedowner(event);if(event.which==2){toggleFullScreen();}}
