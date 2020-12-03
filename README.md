@@ -1,7 +1,6 @@
 # Self-Driving-Squares
 
 November 15, 2020  
-Live demo (physics version): http://drive.x10host.com/city/paths.htm  
 Game Version demo (no physics): http://drive.x10host.com/city/selfDrivingSquares.htm  
 [![screenshot](https://github.com/thismain/Self-Driving-Squares/blob/main/screenshotter.png?raw=true)](http://drive.x10host.com/city/selfDrivingSquares.htm)  
   
@@ -34,10 +33,6 @@ Here are the shortcut keys:
 I am using mrdoob's stats.js: for fps:  
 https://github.com/mrdoob/stats.js/  
   
-I am using (in the non game version) the Matter.js 2d physics library for animation and rendering of the squares:  
-https://brm.io/matter-js/  
-https://github.com/liabru/matter-js  
-  
 I am also using images from:  
 https://www.dreamstime.com/stock-images-city-seamless-vector-wallpaper-image5056574  
 https://thumbs.dreamstime.com/b/city-seamless-vector-wallpaper-5056574.jpg  
@@ -51,4 +46,9 @@ and
 https://www.google.com/maps/  
   
 The images required some manual processing, to change the width/height ratio, and to make sure the white streets are pure white, and in come cases to mirror horizontally and vertically, for doing which I used Gimp.  
+  
+I am using (in the physics, non-game version) the Matter.js 2d physics library for animation and rendering of the squares:  
+https://brm.io/matter-js/  
+https://github.com/liabru/matter-js  
+Live demo (physics version): http://drive.x10host.com/city/paths.htm  
   
