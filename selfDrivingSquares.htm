@@ -206,6 +206,7 @@ var carMaxAccelToScreenRatio=460;
 var bulletToScreenRatio=225;
 var bulletAccelToScreenRatio=165;
 var scoreBoardSizeRatio=34;
+var scoreBoardWidthRatio=24;
 var scoreBoardPosRatio=6.8;
 var scoreBoardBorderRatio=218;
 var scoreBoardTextRatio=48;
@@ -565,11 +566,11 @@ car[i].position.x+=Math.cos(car[i].angle) * carVel[i];
 car[i].position.y+=Math.sin(car[i].angle) * carVel[i]; 
 
 //wrap at edges
-if(car[i].position.x>ww+carSize[i]){car[i].position.x=-carSize[i];
-}else if(car[i].position.x<-carSize[i]){car[i].position.x=ww+carSize[i];}
+if(car[i].position.x>ww+carSize[i]){car[i].position.x=0;
+}else if(car[i].position.x<-carSize[i]){car[i].position.x=ww;}
 
-if(car[i].position.y>hh+carSize[i]){car[i].position.y=-carSize[i];
-}else if(car[i].position.y<-carSize[i]){car[i].position.y=hh+carSize[i];}
+if(car[i].position.y>hh+carSize[i]){car[i].position.y=0;
+}else if(car[i].position.y<-carSize[i]){car[i].position.y=hh;}
 
 renderCars(i);
 }//end all cars loop
@@ -1219,7 +1220,7 @@ oldZoomH=zoomH;
 }//end detect BrowserZoom
 
 function setScoreBoardVars(rb){
-rb.style.width=ww/scoreBoardSizeRatio+'px';
+rb.style.width=ww/scoreBoardWidthRatio+'px';
 rb.style.height=ww/scoreBoardSizeRatio+'px';
 rb.style.lineHeight=ww/scoreBoardSizeRatio+'px';
 rb.style.border=ww/scoreBoardBorderRatio+'px solid rgba(255, 255, 255, .6)';
