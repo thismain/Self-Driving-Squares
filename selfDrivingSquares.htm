@@ -586,7 +586,7 @@ if(car[i].position.y>hh+carSize[i]){car[i].position.y=0;
 renderCars(i);
 }//end all cars loop
 
-scoreBoard();
+
 
 
 detectBrowserZoom();
@@ -782,7 +782,7 @@ break;
 case '3':
 break;
 case 'j':
-showScore=!showScore;
+showScore=!showScore; scoreBoard();
 break;
 case 'n':
 score=[0,0];
@@ -909,12 +909,14 @@ peaceTime=!peaceTime;
 if(peaceTime){
 score=[0,0];
 showScore=false;
+scoreBoard();
 roboWar=[false,false];
 carFiring=[false,false];
 
 }else if(!peaceTime){
 score=[0,0];
 showScore=true;
+scoreBoard();
 roboWar=[true,true];
 carFiring=[false,false];
 for(let b=0;b<numBullets;b++){resetBullet(ci,b);resetBullet(ei,b);}
@@ -1315,6 +1317,7 @@ if(cx <= car[j].position.x+carSize[j] && cx+carSize[i] >= car[j].position.x
 && cy+carSize[i] >= car[j].position.y && cy <= car[j].position.y+carSize[j]){
 colliding[i]=true; 
 score[i]--;
+scoreBoard();
 return true;
 }//if overlapping
 }//end j!=ci
@@ -1356,6 +1359,7 @@ if(bx <= car[c].position.x+carSize[c] && bx+bulletSize[d][b] >= car[c].position.
 colliding[c]=true; 
 score[c]--;
 score[d]++;
+scoreBoard();
 resetBullet(d,b);
 return;
 }
@@ -1415,6 +1419,8 @@ score=[0,0];
 keySwitcher('i');
 }
 }//end keep score
+
+scoreBoard();
 
 function isTouchScreen(){return 'ontouchstart' in document.documentElement;}
 
