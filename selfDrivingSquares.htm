@@ -202,6 +202,8 @@ setBorderDiv();
 var car=[];
 var carSize=[];
 
+var lookAheadDistRatio=170;
+var lookSideDistRatio=342;
 var largeCarToScreenRatio=90;
 var smallCarToScreenRatio=156;
 var carMaxAccelToScreenRatio=460;
@@ -455,8 +457,11 @@ for(let i=0;i<numCars;i++){
 
 if(i!=ci&&i!=ei){
 
-let aheadX=car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle)*(9+carVel[i]*3);
-let aheadY=car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle)*(9+carVel[i]*3);
+let aheadX=car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle)*
+(ww/lookAheadDistRatio+carVel[i]*3);
+
+let aheadY=car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle)*
+(ww/lookAheadDistRatio+carVel[i]*3);
 
 let cS=bgCtx.getImageData(
 aheadX,
@@ -469,8 +474,8 @@ carVel[i]*=.95	;
 
 
 let cR=bgCtx.getImageData(
-car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle-prefAng[i])*4,	 
-car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle-prefAng[i])*4,
+car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle-prefAng[i])*(ww/lookSideDistRatio),	 
+car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle-prefAng[i])*(ww/lookSideDistRatio),
 1,1);
 
 if(cR.data[0]==roadR[ii]){ 
@@ -483,8 +488,8 @@ offRoadThrust[i]=0;
 }else{
 
 let cL=bgCtx.getImageData(
-car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle+prefAng[i])*4,
-car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle+prefAng[i])*4,
+car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle+prefAng[i])*(ww/lookSideDistRatio),
+car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle+prefAng[i])*(ww/lookSideDistRatio),
 1,1);
 
 if(cL.data[0]==roadR[ii]){
