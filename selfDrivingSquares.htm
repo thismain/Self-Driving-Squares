@@ -245,9 +245,9 @@ var flasher=[false,true];
 var flasherTick=[0,0];
 var explodeAlpha=[1.5,1.5];
 
-var showScore=false;
+var showScore=true;
 var score=[0,0];
-var peaceTime=true;
+var peaceTime=false;
 var roboWar=[!peaceTime,!peaceTime];
 var userControlled=false;
 var colliding=[];
@@ -807,7 +807,7 @@ resetDefaultView();
 break;
 case 'i':
 el('canvasZoom').style.backgroundColor='#000000';
-if(!altKey){ii--; if(ii<0){ii=imageFiles.length-1;}}else{
+if(altKey){ii--; if(ii<0){ii=imageFiles.length-1;}}else{
 ii++;if(ii>=imageFiles.length){ii=0;}
 }
 da('loadingStreetMap', 'Loading Street Map Image...');
