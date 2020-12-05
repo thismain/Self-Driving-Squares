@@ -99,14 +99,14 @@ var scrollingHelp=false;
 var showFps=false;
 var showQuestion=true;
 var imageFiles=['googleMap151.png','seamlessMapF.png','seamlessMap3.png','seamlessMap7a.png','googleMap3a.png','googleMap18b.png','googleMap115a.png'];
-var ii=imageFiles.length-1;
+var ii=1; //imageFiles.length-1
 var roadR=[255,255,255,255,255,255,255];
 var zoomer=false;
 var paused=false;
 var touchDriving=false;
 var showSteeringFireDivs=false;
 
-var numCars=50;
+var numCars=100;
 var changingNumCars=false;
 var ctxScale=1;
 
@@ -229,6 +229,8 @@ var reverseDir=[];
 var carVel=[];
 var maxAccel=[];
 
+var leftPref=[];
+var prefAng=[];
 var steerLeft=[];
 var steerRight=[];
 var steerAng=[]; 
@@ -243,9 +245,9 @@ var flasher=[false,true];
 var flasherTick=[0,0];
 var explodeAlpha=[1.5,1.5];
 
-var showScore=true;
+var showScore=false;
 var score=[0,0];
-var peaceTime=false;
+var peaceTime=true;
 var roboWar=[!peaceTime,!peaceTime];
 var userControlled=false;
 var colliding=[];
@@ -277,6 +279,14 @@ reverseDir[i]=1;
 maxAccel[i]=ww/carMaxAccelToScreenRatio; 
 carVel[i]=maxAccel[i];
 
+if(i%2>0){
+leftPref[i]=true;
+prefAng[i]=.5;
+}else{
+leftPref[i]=false;
+prefAng[i]=-.5;
+}
+
 steerLeft[i]=false;
 steerRight[i]=false;
 steerAng[i]=0; 
@@ -293,7 +303,7 @@ collisionTick[i]=0;
 
 almostColliding[i]=false;
 
-offRoadCounter[i]=true;
+offRoadCounter[i]=randRange(0,60);
 offRoadThrust[i]=.2;
 }//end set car array vars
 }//end setCarDefaults
@@ -445,65 +455,58 @@ for(let i=0;i<numCars;i++){
 
 if(i!=ci&&i!=ei){
 
-// check straight ahead
-{
-let aheadX=car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle)*10;
-let aheadY=car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle)*10;
+let aheadX=car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle)*(9+carVel[i]*3);
+let aheadY=car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle)*(9+carVel[i]*3);
 
 let cS=bgCtx.getImageData(
 aheadX,
 aheadY,
 1,1);
 
-//road ends ahead, so check right and left, if at edge just keep going
 if(cS.data[0]!=roadR[ii]&&aheadX>0&&aheadX<ww&&aheadY>0&&aheadY<hh){
-
 offRoadCounter[i]++;if(offRoadCounter[i]>60){offRoadThrust[i]=.2;}
+carVel[i]*=.95	;
 
-carVel[i]*=.95;
 
-// check leftward ahead, getImatgeData(x,y,width,height)
-{
 let cR=bgCtx.getImageData(
-car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle-0.5)*4,	 
-car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle-0.5)*4,
+car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle-prefAng[i])*4,	 
+car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle-prefAng[i])*4,
 1,1);
 
-//if road detected leftward
 if(cR.data[0]==roadR[ii]){ 
-carVel[i]*=.95
-steerLeft[i]=true; steerRight[i]=false;
+carVel[i]*=.94
+steerLeft[i]=leftPref[i]; 
+steerRight[i]=!leftPref[i];
 goBackward[i]=false
+offRoadCounter[i]=0;
+offRoadThrust[i]=0;
 }else{
 
-// check rightward ahead
-{
 let cL=bgCtx.getImageData(
-car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle+0.5)*4,
-car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle+0.5)*4,
+car[i].position.x+carSize[i]*.5+Math.cos(car[i].angle+prefAng[i])*4,
+car[i].position.y+carSize[i]*.5+Math.sin(car[i].angle+prefAng[i])*4,
 1,1);
 
 if(cL.data[0]==roadR[ii]){
-carVel[i]*=.95
-steerRight[i]=true; steerLeft[i]=false;
+carVel[i]*=.94
+steerRight[i]=leftPref[i]; 
+steerLeft[i]=!leftPref[i];
 goBackward[i]=false;
+offRoadCounter[i]=0;
+offRoadThrust[i]=0;
 }else{
-//steerLeft[i]=false; steerRight[i]=false;
 goBackward[i]=true;
 }
-}//end check rightward ahead
-
 
 }//end road not detected leftward
-}//end check leftward ahead
 
 
-//if road continues straight ahead, do not turn
-}else{
-offRoadCounter[i]=0;offRoadThrust[i]=0;
-steerRight[i]=false; steerLeft[i]=false;
+}else{ //go straight ahead
+offRoadCounter[i]=0;
+offRoadThrust[i]=0;
+steerRight[i]=false; 
+steerLeft[i]=false;
 }
-}//end check rightward ahead
 
 }//end i!=ci && i!=ei
 
@@ -514,7 +517,7 @@ if(steerRight[i]){rightSteerAng[i]=steerAngInc; leftSteerAng[i]=0;
 if(i!=ci && i!=ei){
 rightSpin[i]++;
 leftSpin[i]=0;
-if(rightSpin[i]>20){spinThrust[i]=.2;rightSpin[i]=0;steerRight[i]=false;}
+if(rightSpin[i]>30){spinThrust[i]=.1;rightSpin[i]=0;steerRight[i]=false;}
 }
 
 }else if(steerLeft[i]){leftSteerAng[i]=-steerAngInc; rightSteerAng[i]=0;
@@ -522,7 +525,7 @@ if(rightSpin[i]>20){spinThrust[i]=.2;rightSpin[i]=0;steerRight[i]=false;}
 if(i!=ci && i!=ei){
 leftSpin[i]++;
 rightSpin[i]=0;
-if(leftSpin[i]>20){spinThrust[i]=.2;leftSpin[i]=0;steerLeft[i]=false;}
+if(leftSpin[i]>30){spinThrust[i]=.1;leftSpin[i]=0;steerLeft[i]=false;}
 }
 
 }else{
@@ -1263,7 +1266,7 @@ if(i==0||i==1){carSize[i]=ww/largeCarToScreenRatio;}
 
 setVarsRelativeToScreenWidth();
 
-//check if wider bounds than collision bounds are overlapping, w=range
+//check if wider bounds than collision bounds are overlapping, r=range
 function collisionAlmostOccurring(i,r){
 
 almostColliding[i]=false;
@@ -1282,7 +1285,7 @@ let angToThreat=Math.atan2(vecToThreat.y, vecToThreat.x);
 let bearDiff=fixAngleRad(car[i].angle-angToThreat);
 //da('tester', car[ci].angle.toFixed(3)+' ---- '+angToThreat.toFixed(3)+' ---- '+bearDiff.toFixed(3));
 
-if(Math.abs(bearDiff)<Math.PI/1.5){
+if(Math.abs(bearDiff)<Math.PI/1.4){
 bearDiff/=10;
 
 if(bearDiff>.2){bearDiff=.2;}else if(bearDiff<-.2){bearDiff=-.2;}
