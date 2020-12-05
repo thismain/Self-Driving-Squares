@@ -35,7 +35,7 @@ https://github.com/liabru/matter-js
 <style>
 .ui{
 line-height:26px;
-font-size:18px;
+font-size:16px;
 color:#00ff00;
 border:1px solid #00ff00;
 text-align:center;
@@ -69,10 +69,29 @@ background-color:#004705;
 
 <div id="scoreRed" style="z-index:1010;color:rgba(255,255,255,1);background-color:rgba(255,0,0,.5);border-radius:10px;width:40px;height:40px;top:0px;right:200px;position:absolute;border:5px solid rgba(255, 255, 255, .6);border-style:ridge;font-family:monospace;font-size:23px;text-align:center;line-height:40px;text-shadow: 2px 4px rgba(0,0,0,.95);font-weight:bold;"></div>
 
+
+
+
+<div id="stayAliveBlue" style="display:block;z-index:1010;background-color:rgba(0,0,0,.5);border-radius:4px;width:200px;height:5px;top:0px;left:200px;position:absolute;border:2px solid rgba(0, 0,0,.5);">
+<div id="aliveMeterBlue" style="background-color:rgba(0,0,255,1);width:1%;height:5px;font-family:monospace;color:#000000;line-height:34px;">
+
+</div>
+</div>
+
+<div id="stayAliveRed" style="display:block;z-index:1010;background-color:rgba(0,0,0,.5);border-radius:4px;width:200px;height:5px;top:0px;right:200px;position:absolute;border:2px solid rgba(0, 0, 0, .5);">
+<div id="aliveMeterRed" style="background-color:rgba(255,0,0,1);width:1%;height:5px;font-family:monospace;color:#000000;line-height:34px;"></div>
+</div>
+
+<div id="declareWinnerDiv" style="opacity:.9;display:none;z-index:10000;position:absolute;top:50px;left:50px;color:#ffffff;background-color:#000000;font-family:monospace;font-size:40px;padding:30px;border:2px solid #ffffff;width:300px;height:80px;text-align:center;line-height:80px;"></div>
+
+
 <div id="steeringDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:20px;width:110;height:34px;bottom:0px;left:100px;position:absolute;font-family:monospace;font-size:40px;text-align:center;line-height:34px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;">&#129068; &#129070;</div>
 
 
 <div id="fireDiv" style="display:none;z-index:1010;color:rgba(255,255,255,.8);background-color:rgba(0,0,0,.3);border-radius:20px;width:40;height:40px;bottom:0px;right:100px;position:absolute;font-family:monospace;font-size:50px;text-align:center;line-height:32px;text-shadow: 2px 4px rgba(0,0,0,.4);font-weight:bold;">&#9678;</div>
+
+
+
 
 </body>
 </html>
@@ -155,6 +174,7 @@ setZimg();
 drawZimg();
 document.body.backgroundColor='#ffffff';
 el('loadingStreetMap').style.display='none';
+setTimeout("el('declareWinnerDiv').style.display='none';",1000);
 }//end bImg onload
 
 function setBimg(){
@@ -247,13 +267,18 @@ var flasher=[false,true];
 var flasherTick=[0,0];
 var explodeAlpha=[1.5,1.5];
 
-var showScore=true;
+var stayAliveCounter=[0,0];
+var playingStayAlive=false;
+var winner='none';
+
 var score=[0,0];
 var peaceTime=false;
+var showScore=!peaceTime;
 var roboWar=[!peaceTime,!peaceTime];
 var userControlled=false;
 var colliding=[];
 var collisionTick=[];
+
 
 var almostColliding=[];
 
@@ -424,18 +449,14 @@ ctx.clearRect(0,0,ww,hh);
 car[ci].angle=fixAngleRad(car[ci].angle);
 car[ei].angle=fixAngleRad(car[ei].angle);
 
-if(!userControlled){
-collisionAlmostOccurring(ci,60);
-}
+stayAlive();
+
+
+if(!userControlled){collisionAlmostOccurring(ci,60);}
 collisionAlmostOccurring(ei,60);
 
-if(roboWar[ci]&&!userControlled){
-autoTarget(ci,ei);
-}
-
-if(roboWar[ei]){
-autoTarget(ei,ci);
-}
+if(roboWar[ci]&&!userControlled){autoTarget(ci,ei);}
+if(roboWar[ei]){autoTarget(ei,ci);}
 
 
 fireShot(ci);
@@ -555,18 +576,12 @@ carVel[i]-=thrustInc+spinThrust[i]+offRoadThrust[i];
 reverseDir[i]=-1;
 }
 
-if(!colliding[i]&&!stopper){
-goForward[i]=true;
-}
+if(!colliding[i]&&!stopper){goForward[i]=true;}
 
 }else{  //when over speed limit
-//carVel[i]*=.99;
 goForward[i]=false;
 }
 
-if(!goForward[i]&&!goBackward[i]){
-//carVel[i]*=.99;
-}
 
 if(!steerLeft[i]&&!steerRight[i]){steerAng[i]*=.4;}
 
@@ -594,8 +609,8 @@ stats.end();
 }//end if !changingNumCars
 }//end if !paused
 window.requestAnimationFrame(ticker);
- 
 
+ 
 } //end ticker function
 
 
@@ -751,8 +766,9 @@ da('tester',
 '&bull; <span class="ui" onmousedown="keySwitcher(\'Shift\')">shift</span> key to fire<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\' \')">spacebar</span> key to stop moving<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'y\')">y</span> key to let red square control itself<BR>'+
+'&bull; <span class="ui" onmousedown="keySwitcher(\'1\')">1</span> key to toggle stay alive game: 1st one to survive 2000 ticks wins<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'u\')">u</span> key to toggle war game<BR>'+
-'&nbsp;&nbsp;&nbsp;&nbsp; game points: 5 wins; hit=1; get hit=-1; collide=-1<BR>'+ 
+'&nbsp;&nbsp;&nbsp;&nbsp; game points:5 wins; hit=1; get hit=-1; collide=-1; 1 point for not exploding for 2000 ticks<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'j\')">j</span> key to show score<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'t\')">t</span> key to show touchscreen steering and fire controls<BR>'+
 '&bull; <span class="ui" onmousedown="keySwitcher(\'n\')">n</span> key to start new game<BR>'+
@@ -776,6 +792,27 @@ switch(f){
 case '0':
 break;
 case '1':
+playingStayAlive=!playingStayAlive;
+if(playingStayAlive){
+stayAliveCounter[ci]=0;
+stayAliveCounter[ei]=0;
+peaceTime=true;
+score=[0,0];
+showScore=false;
+scoreBoard();
+roboWar=[false,false];
+carFiring=[false,false];
+}else{
+peaceTime=false;
+stayAliveCounter[ci]=0;
+stayAliveCounter[ei]=0;
+score=[0,0];
+showScore=true;
+scoreBoard();
+roboWar=[true,true];
+carFiring=[false,false];
+for(let b=0;b<numBullets;b++){resetBullet(ci,b);resetBullet(ei,b);}
+}
 break;
 case '2':
 break;
@@ -1316,6 +1353,7 @@ if(j!=i&&!colliding[j]){
 if(cx <= car[j].position.x+carSize[j] && cx+carSize[i] >= car[j].position.x
 && cy+carSize[i] >= car[j].position.y && cy <= car[j].position.y+carSize[j]){
 colliding[i]=true; 
+stayAliveCounter[i]=0;
 score[i]--;
 scoreBoard();
 return true;
@@ -1357,6 +1395,7 @@ let by=bulletPos[d][b].y;
 if(bx <= car[c].position.x+carSize[c] && bx+bulletSize[d][b] >= car[c].position.x
 && by+bulletSize[d][b] >= car[c].position.y && by <= car[c].position.y+carSize[c]){
 colliding[c]=true; 
+stayAliveCounter[c]=0;
 score[c]--;
 score[d]++;
 scoreBoard();
@@ -1485,6 +1524,52 @@ el('fireDiv').style.cursor='pointer';
 el('fireDiv').onmousedown=function(){touchFireStart(event);}
 el('fireDiv').onmouseup=function(){touchFireEnd();} 
 }//end if ! is touch screen
+
+
+function stayAlive(){
+let cn=['Red', 'Blue'];
+
+for(let i=0;i<2;i++){
+stayAliveCounter[i]++;
+
+if(playingStayAlive){
+el('stayAlive'+cn[i]).style.display='block';
+el('aliveMeter'+cn[i]).style.width=(stayAliveCounter[i]/2000)*100+'%';
+//da('aliveMeter'+cn[i], (stayAliveCounter[i]*.1).toFixed(0));
+}else{
+el('stayAlive'+cn[i]).style.display='none';
+}
+
+if(stayAliveCounter[i]>2000){
+score[i]++;
+scoreBoard();
+if(winner=='none'){winner=cn[i];}else{winner='tie';}
+}//if stay alive counter >
+}//end ci ei loop
+
+if(playingStayAlive&&winner!='none'){
+stayAliveCounter[ci]=0;
+stayAliveCounter[ei]=0;
+declareWinner(winner);
+winner='none';
+keySwitcher('i');
+}//end if playing stay alive
+
+}//end stay alive
+
+
+function declareWinner(color){
+if(color=='tie'){color='purple';}
+el('declareWinnerDiv').style.left=(ww-300)/2+'px';
+el('declareWinnerDiv').style.top=(hh-80)/2+'px';
+el('declareWinnerDiv').style.backgroundColor=color;
+
+if(color=='purple'){
+da('declareWinnerDiv', 'Tie!');
+}else{
+da('declareWinnerDiv', color+' Wins!');
+}
+}//end declareWinner
 
 
 el('canvid').focus();
