@@ -794,8 +794,7 @@ break;
 case '1':
 playingStayAlive=!playingStayAlive;
 if(playingStayAlive){
-stayAliveCounter[ci]=0;
-stayAliveCounter[ei]=0;
+stayAliveCounter=[0,0];
 peaceTime=true;
 score=[0,0];
 showScore=false;
@@ -804,8 +803,7 @@ roboWar=[false,false];
 carFiring=[false,false];
 }else{
 peaceTime=false;
-stayAliveCounter[ci]=0;
-stayAliveCounter[ei]=0;
+stayAliveCounter=[0,0];
 score=[0,0];
 showScore=true;
 scoreBoard();
@@ -822,6 +820,7 @@ case 'j':
 showScore=!showScore; scoreBoard();
 break;
 case 'n':
+stayAliveCounter=[0,0];
 score=[0,0];
 break;
 case ' ':
@@ -1548,8 +1547,7 @@ if(winner=='none'){winner=cn[i];}else{winner='tie';}
 }//end ci ei loop
 
 if(playingStayAlive&&winner!='none'){
-stayAliveCounter[ci]=0;
-stayAliveCounter[ei]=0;
+stayAliveCounter=[0,0];
 declareWinner(winner);
 winner='none';
 keySwitcher('i');
