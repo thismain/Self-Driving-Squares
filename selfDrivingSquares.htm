@@ -103,6 +103,7 @@ function da(a,b){if(el(a)){el(a).innerHTML=b;el(a).style.display='block';}}
 function fixAngleRad(a){if(a>Math.PI){a-=Math.PI*2;}else if(a<-Math.PI){a+=Math.PI*2;}return a;}
 function randRange(min, max){return Math.floor(Math.random() * (max - min + 1)) + min;}
 function subber(a,b){return {x:a.x-b.x, y: a.y-b.y};}
+function distancer(v){return Math.sqrt((v.x * v.x) + (v.y * v.y));}
 function randHexColor(){return '#'+Math.floor(Math.random()*16777215).toString(16);}
 function componentToHex(c){var hex=c.toString(16);return hex.length==1?"0"+hex:hex;}
 function rgbToHex(r,g,b){return "#"+componentToHex(r)+componentToHex(g)+componentToHex(b);}
@@ -117,8 +118,8 @@ var showHelp=false;
 var scrollingHelp=false;
 var showFps=false;
 var showQuestion=true;
-var imageFiles=['googleMap151.png','seamlessMapF.png','googleMap115a.png','seamlessMap7a.png','googleMap3a.png','googleMap18b.png','seamlessMap3.png'];
-var ii=1; //imageFiles.length-1
+var imageFiles=['seamlessMapF.png','seamlessMap3.png','googleMap115a.png','seamlessMap7a.png','googleMap3a.png','googleMap18b.png','googleMap151.png'];
+var ii=0; //imageFiles.length-1
 var roadR=[255,255,255,255,255,255,255];
 var zoomer=false;
 var paused=false;
@@ -244,7 +245,7 @@ var helpDivLineHeightRatio=62;
 var ci=0;
 var ei=1;
 
-var stopper=false;
+var stopper=[false,false];
 var goForward=[];
 var goBackward=[];
 var reverseDir=[];
@@ -332,6 +333,8 @@ almostColliding[i]=false;
 
 offRoadCounter[i]=randRange(0,60);
 offRoadThrust[i]=.2;
+
+stayAliveCounter[i]=0;
 }//end set car array vars
 }//end setCarDefaults
 
@@ -455,6 +458,7 @@ stayAlive();
 if(!userControlled){collisionAlmostOccurring(ci,60);}
 collisionAlmostOccurring(ei,60);
 
+
 if(roboWar[ci]&&!userControlled){autoTarget(ci,ei);}
 if(roboWar[ei]){autoTarget(ei,ci);}
 
@@ -491,7 +495,7 @@ aheadY,
 
 if(cS.data[0]!=roadR[ii]&&aheadX>0&&aheadX<ww&&aheadY>0&&aheadY<hh){
 offRoadCounter[i]++;if(offRoadCounter[i]>60){offRoadThrust[i]=.2;}
-carVel[i]*=.95	;
+carVel[i]*=.95;
 
 
 let cR=bgCtx.getImageData(
@@ -563,6 +567,8 @@ steerAng[i]+=leftSteerAng[i] + rightSteerAng[i];
 }
 
 
+
+
 //speed limit
 if(Math.abs(carVel[i])<maxAccel[i]){   
 
@@ -576,7 +582,8 @@ carVel[i]-=thrustInc+spinThrust[i]+offRoadThrust[i];
 reverseDir[i]=-1;
 }
 
-if(!colliding[i]&&!stopper){goForward[i]=true;}
+if(!colliding[i]&&!stopper[i]){goForward[i]=true;}else{goForward[i]=false;}
+
 
 }else{  //when over speed limit
 goForward[i]=false;
@@ -824,8 +831,8 @@ stayAliveCounter=[0,0];
 score=[0,0];
 break;
 case ' ':
-stopper=!stopper;
-if(stopper){
+stopper[ci]=!stopper[ci];
+if(stopper[ci]){
 carVel[ci]=0;
 }
 break;
@@ -912,7 +919,7 @@ case 'w': case 'ArrowUp':
 if(!userControlled){carFiring[ci]=false;fireCounter[ci]=0;}
 userControlled=true;
 goForward[ci]=true; 
-stopper=false;
+stopper[ci]=false;
 if(carVel[ci]<0){carVel[ci]=0;}
 break;
 
@@ -920,7 +927,7 @@ case 's': case 'ArrowDown':
 if(!userControlled){carFiring[ci]=false;fireCounter[ci]=0;}
 userControlled=true;
 goForward[ci]=false;
-stopper=true; 
+stopper[ci]=true; 
 if(carVel[ci]>0){carVel[ci]=-1;}
 break;
 
@@ -962,7 +969,7 @@ for(let b=0;b<numBullets;b++){resetBullet(ci,b);resetBullet(ei,b);}
 break;
 case 'y': //give control of red square back to algorithm
 userControlled=false;
-stopper=false;
+stopper[ci]=false;
 if(!roboWar[ci]){carFiring[ci]=false;}
 if(roboWar[ci]){
 for(let b=0;b<numBullets;b++){resetBullet(ci,b);}
@@ -1328,8 +1335,18 @@ let angToThreat=Math.atan2(vecToThreat.y, vecToThreat.x);
 let bearDiff=fixAngleRad(car[i].angle-angToThreat);
 //da('tester', car[ci].angle.toFixed(3)+' ---- '+angToThreat.toFixed(3)+' ---- '+bearDiff.toFixed(3));
 
+let dist=distancer(vecToThreat);
+if(Math.abs(bearDiff)<.5&&dist<40){
+goForward[i]=false;
+stopper[i]=true; 
+carVel[i]=0;
+}else{
+goForward[i]=true;
+stopper[i]=false; 
+}
+
 if(Math.abs(bearDiff)<Math.PI/1.4){
-bearDiff/=10;
+//bearDiff*=.1;
 
 if(bearDiff>.2){bearDiff=.2;}else if(bearDiff<-.2){bearDiff=-.2;}
 car[i].angle+=bearDiff;
@@ -1453,7 +1470,8 @@ el('scoreBlue').style.display='none';
 el('scoreRed').style.display='none';
 }
 if(score[ci]>=5||score[ei]>=5){
-score=[0,0];
+score=[0,0]; 
+scoreBoard();
 keySwitcher('i');
 }
 }//end keep score
