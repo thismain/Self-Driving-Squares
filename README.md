@@ -2,7 +2,7 @@
 
 November 15, 2020  
   
-Demo: http://drive.x10host.com/city/selfDrivingSquares.htm  
+Demo: http://moygen.rf.gd/selfDriving/selfDrivingSquares.htm
 [![screenshot](https://github.com/thismain/Self-Driving-Squares/blob/main/screenshot37.png?raw=true)](http://drive.x10host.com/city/selfDrivingSquares.htm)  
   
 This program was intended for use with a keyboard and mouse with a scroll wheel as the input devices, rather than a touchscreen. It may still work on a touchscreen, but not with all the options.
